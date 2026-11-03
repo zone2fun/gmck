@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -68,6 +69,7 @@ export default function MemberSearch() {
             <p className="mt-1 text-xs text-zinc-400">{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ") || "ยังไม่ได้ระบุข้อมูลเพิ่มเติม"}</p>
             {member.bio && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-300">{member.bio}</p>}
             {member.interests?.length ? <div className="mt-3 flex flex-wrap gap-2">{member.interests.map((interest) => <span key={interest} className="pill rounded-full px-3 py-1 text-xs">{interest}</span>)}</div> : null}
+            <Link href={`/profile/${member.member_id}`} className="mt-4 block rounded-xl border border-purple-300/30 px-4 py-3 text-center text-sm font-medium text-purple-200 hover:bg-purple-500/10">ดูโปรไฟล์และส่งข้อความ →</Link>
           </article>
         ))}
       </div>
