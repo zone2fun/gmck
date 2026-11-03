@@ -23,6 +23,7 @@ type ExistingProfile = {
   relationship_goal: string | null;
   bio: string;
   avatar_path: string | null;
+  is_discoverable: boolean;
 };
 
 export default function ProfileForm({ userId, initialProfile }: { userId: string; initialProfile: ExistingProfile | null }) {
@@ -38,6 +39,7 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [avatarPath, setAvatarPath] = useState(initialProfile?.avatar_path ?? "");
+  const [isDiscoverable, setIsDiscoverable] = useState(initialProfile?.is_discoverable ?? false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -97,6 +99,7 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
         bio: about.trim(),
         avatar_path: nextAvatarPath,
         profile_completed: true,
+        is_discoverable: isDiscoverable,
         updated_at: new Date().toISOString(),
       });
       if (saveError) throw saveError;
@@ -166,6 +169,14 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
         </label>
       </section>
 
+      <section className="panel p-5">
+        <h2 className="font-semibold">การค้นพบโปรไฟล์</h2>
+        <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm">
+          <input type="checkbox" checked={isDiscoverable} onChange={(e) => setIsDiscoverable(e.target.checked)} className="mt-1 accent-purple-500" />
+          <span>อนุญาตให้สมาชิกที่เข้าสู่ระบบค้นพบโปรไฟล์ของฉัน</span>
+        </label>
+        <p className="mt-2 text-xs leading-6 text-zinc-500">หากไม่เลือก โปรไฟล์ของคุณจะไม่ปรากฏในหน้าค้นหาสมาชิก การตั้งค่านี้ไม่เปิดเผยวันเกิด วันเกิดเต็ม หรือพิกัดตำแหน่ง</p>
+      </section>
       <p className="text-xs leading-6 text-zinc-500">การระบุวันเกิดเป็นการยืนยันด้วยตนเองเท่านั้น ยังไม่ใช่การตรวจสอบอายุหรือยืนยันตัวตนโดยอิสระ GMCK จะต้องเพิ่มระบบตรวจสอบอายุก่อนเปิดให้บริการสาธารณะ</p>
       {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
       {message && <p role="status" className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</p>}
