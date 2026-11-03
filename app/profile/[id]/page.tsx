@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import MessageRequestButton from "./message-request-button";
+import MemberSafetyActions from "@/components/member-safety-actions";
 
 type Profile = { member_id: string; nickname: string; age: number; height_cm: number | null; body_type: string | null; interests: string[] | null; relationship_goal: string | null; bio: string | null; avatar_path: string | null };
 const goals: Record<string,string> = { friends:"หาเพื่อน", chat:"พูดคุย", casual:"ความสัมพันธ์แบบสบาย ๆ", dating:"เดต", long_term:"ความสัมพันธ์จริงจัง", open_to_all:"เปิดใจ" };
@@ -31,6 +32,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       {!!profile.interests?.length && <div className="mt-6"><h2 className="font-semibold">ความสนใจ</h2><div className="mt-3 flex flex-wrap gap-2">{profile.interests.map((x) => <span key={x} className="pill rounded-full px-3 py-2 text-xs">{x}</span>)}</div></div>}
     </section>
     <MessageRequestButton recipientId={profile.member_id}/>
+    <MemberSafetyActions memberId={profile.member_id} returnTo="/discover"/>
     <p className="mt-5 text-center text-xs leading-6 text-zinc-500">ส่งข้อความแรกได้ 1 ข้อความ สมาชิกอีกฝ่ายต้องยอมรับคำขอก่อนจึงจะสนทนาต่อได้</p>
   </main>;
 }
