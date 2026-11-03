@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const radii = [1, 5, 10, 25, 50, 100] as const;
@@ -26,7 +26,7 @@ export default function NearbyPage() {
   const [busy, setBusy] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [notice, setNotice] = useState("");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const searchMembers = useCallback(async (selectedRadius = radius) => {
     setBusy(true);
