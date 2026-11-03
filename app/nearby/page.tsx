@@ -168,6 +168,7 @@ export default function NearbyPage() {
             {member.relationship_goal && <p className="mt-3 text-xs text-purple-200">{goalLabels[member.relationship_goal] ?? member.relationship_goal}</p>}
             {member.bio && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-300">{member.bio}</p>}
             {!!member.interests?.length && <div className="mt-3 flex flex-wrap gap-2">{member.interests.map((interest) => <span key={interest} className="pill rounded-full px-3 py-1 text-xs">{interest}</span>)}</div>}
+            <Link href={`/profile/${member.member_id}`} className="mt-4 block rounded-xl border border-purple-300/30 px-4 py-3 text-center text-sm font-medium text-purple-200 hover:bg-purple-500/10">ดูโปรไฟล์และส่งข้อความ →</Link>
           </article>)}
         </div>
       </section>}
