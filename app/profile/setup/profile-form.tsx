@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const interestOptions = ["ออกกำลังกาย", "ท่องเที่ยว", "ดูหนัง/ซีรีส์", "เกม", "ดนตรี", "อาหาร", "ธรรมชาติ", "คาเฟ่", "เทคโนโลยี"];
@@ -26,6 +27,7 @@ type ExistingProfile = {
 
 export default function ProfileForm({ userId, initialProfile }: { userId: string; initialProfile: ExistingProfile | null }) {
   const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
   const [nickname, setNickname] = useState(initialProfile?.nickname ?? "");
   const [birthDate, setBirthDate] = useState(initialProfile?.birth_date ?? "");
   const [height, setHeight] = useState(initialProfile?.height_cm?.toString() ?? "");
@@ -100,7 +102,9 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
       if (saveError) throw saveError;
       setAvatarPath(nextAvatarPath ?? "");
       setPhoto(null);
-      setMessage("บันทึกโปรไฟล์เรียบร้อยแล้ว");
+      setMessage("บันทึกโปรไฟล์เรียบร้อยแล้ว กำลังไปหน้าแรก...");
+      router.push("/home");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง");
     } finally {
