@@ -68,12 +68,12 @@ export default async function MemberHomePage() {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">เริ่มต้นใช้งาน</h2>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="panel p-4">
+          <Link href="/nearby" className="panel block p-4 transition hover:border-purple-300/40">
             <span className="text-2xl text-purple-300">⌖</span>
             <h3 className="mt-3 font-semibold">สมาชิกใกล้เคียง</h3>
-            <p className="mt-1 text-xs leading-5 text-zinc-400">ค้นหาตามระยะทาง โดยไม่เปิดเผยตำแหน่งจริง</p>
-            <span className="mt-3 inline-block text-xs text-purple-300">กำลังพัฒนา</span>
-          </div>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">เลือกช่วงระยะค้นหาและตั้งค่าสิทธิ์ตำแหน่ง</p>
+            <span className="mt-3 inline-block text-xs text-purple-300">ตั้งค่า Nearby →</span>
+          </Link>
           <div className="panel p-4">
             <span className="text-2xl text-purple-300">♡</span>
             <h3 className="mt-3 font-semibold">ค้นหาสมาชิก</h3>
