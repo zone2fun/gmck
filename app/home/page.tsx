@@ -86,6 +86,12 @@ export default async function MemberHomePage() {
             <p className="mt-1 text-xs leading-5 text-zinc-400">พูดคุยและจัดการคำขอข้อความ</p>
             <span className="mt-3 inline-block text-xs text-purple-300">เปิดข้อความ →</span>
           </Link>
+          <Link href="/album" className="panel block p-4 transition hover:border-purple-300/40">
+            <span className="text-2xl text-purple-300">▧</span>
+            <h3 className="mt-3 font-semibold">อัลบั้มส่วนตัว</h3>
+            <p className="mt-1 text-xs leading-5 text-zinc-400">จัดการรูปและอนุมัติผู้เข้าดู</p>
+            <span className="mt-3 inline-block text-xs text-purple-300">จัดการอัลบั้ม →</span>
+          </Link>
           <Link href="/blocked" className="panel block p-4 transition hover:border-purple-300/40">
             <span className="text-2xl text-purple-300">◇</span>
             <h3 className="mt-3 font-semibold">ความปลอดภัย</h3>
