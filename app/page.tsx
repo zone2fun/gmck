@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const features = [
   { icon: "⌖", title: "เริ่มจากคนใกล้คุณ", detail: "เลือกค้นหาตามระยะทาง โดยไม่เปิดเผยตำแหน่งจริง" },
   { icon: "♡", title: "ความสัมพันธ์ในแบบของคุณ", detail: "เพื่อน คนคุย เดต หรือความสัมพันธ์ระยะยาว" },
@@ -39,14 +41,12 @@ export default function HomePage() {
           ))}
         </div>
 
-        <button
-          className="mt-8 w-full rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-6 py-4 font-semibold text-white shadow-lg shadow-purple-950/40 transition hover:brightness-110"
-          type="button"
-          disabled
-          title="ระบบสมัครสมาชิกจะเปิดในขั้นตอนถัดไป"
+        <Link
+          href="/auth"
+          className="mt-8 block w-full rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-purple-950/40 transition hover:brightness-110"
         >
-          เริ่มต้นใช้งานเร็ว ๆ นี้
-        </button>
+          สมัครสมาชิก / เข้าสู่ระบบ
+        </Link>
         <p className="mt-4 text-center text-xs leading-6 text-zinc-500">
           สำหรับผู้มีอายุ 18 ปีขึ้นไป · เคารพความเป็นส่วนตัวของทุกคน
         </p>
