@@ -16,9 +16,12 @@ export default function ConversationView({conversationId,status,incoming,userId,
   const [otherOnline,setOtherOnline]=useState(false);
   const [otherTyping,setOtherTyping]=useState(false);
   const channelRef=useRef<ReturnType<typeof supabase.channel>|null>(null);
+  const messagesEndRef=useRef<HTMLDivElement|null>(null);
   const typingTimeout=useRef<ReturnType<typeof setTimeout>|null>(null);
   const stopTypingTimeout=useRef<ReturnType<typeof setTimeout>|null>(null);
   const isAccepted=status==="accepted";
+
+  useEffect(()=>{messagesEndRef.current?.scrollIntoView({behavior:"smooth",block:"end"});},[messages.length,otherTyping]);
 
   useEffect(()=>{
     if(status==="declined") return;
@@ -87,16 +90,16 @@ export default function ConversationView({conversationId,status,incoming,userId,
     setMessages(current=>current.some(m=>m.id===data)?current:[...current,{id:data,sender_id:userId,body:message,created_at:new Date().toISOString()}]);
     setBody("");setBusy(false);void broadcastTyping(false);router.refresh();
   }
-  return <section className="panel mt-6 p-4">
-    <div className="mb-3 flex items-center justify-between text-xs">
+  return <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-2 text-xs">
       <span className="text-zinc-400">{otherTyping?"กำลังพิมพ์...":otherOnline?<span className="text-emerald-300">● ออนไลน์</span>:"ออฟไลน์"}</span>
       <span className={connected?"text-emerald-300":"text-zinc-500"}>{connected?"● เชื่อมต่อแบบเรียลไทม์":"กำลังเชื่อมต่อ..."}</span>
     </div>
-    <div className="max-h-[55vh] min-h-48 space-y-3 overflow-y-auto">{messages.map(m=><div key={m.id} className={"flex "+(m.sender_id===userId?"justify-end":"justify-start")}><p className={"max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 "+(m.sender_id===userId?"bg-purple-600/80 text-white":"bg-white/10 text-zinc-200")}>{m.body}</p></div>)}</div>
-    {incoming && <div className="mt-5 border-t border-white/10 pt-4"><p className="text-sm leading-6 text-zinc-300">สมาชิกส่งคำขอข้อความถึงคุณ คุณสามารถยอมรับเพื่อเริ่มสนทนา หรือปฏิเสธได้</p><div className="mt-3 flex gap-2"><button disabled={busy} onClick={()=>void respond(true)} className="flex-1 rounded-xl bg-purple-600 px-4 py-3 text-sm font-semibold disabled:opacity-50">ยอมรับคำขอ</button><button disabled={busy} onClick={()=>void respond(false)} className="rounded-xl border border-white/10 px-4 py-3 text-sm">ปฏิเสธ</button></div></div>}
-    {isAccepted && <div className="mt-4 flex gap-2 border-t border-white/10 pt-4"><input value={body} onChange={e=>handleBodyChange(e.target.value)} maxLength={2000} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void send();}}} placeholder="พิมพ์ข้อความ..." className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm outline-none focus:border-purple-400"/><button disabled={busy||!body.trim()} onClick={()=>void send()} className="rounded-xl bg-purple-600 px-4 text-sm font-semibold disabled:opacity-50">ส่ง</button></div>}
-    {status==="pending"&&!incoming&&<p className="mt-5 border-t border-white/10 pt-4 text-center text-sm text-zinc-400">ส่งคำขอแล้ว รออีกฝ่ายยอมรับก่อนจึงจะส่งข้อความเพิ่มเติมได้</p>}
-    {status==="declined"&&<p className="mt-5 border-t border-white/10 pt-4 text-center text-sm text-zinc-400">คำขอนี้ถูกปฏิเสธแล้ว</p>}
-    {error&&<p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
+    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4">{messages.map(m=><div key={m.id} className={"flex "+(m.sender_id===userId?"justify-end":"justify-start")}><p className={"max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 "+(m.sender_id===userId?"bg-purple-600/80 text-white":"bg-white/10 text-zinc-200")}>{m.body}</p></div>)}</div>
+    {incoming && <div className="shrink-0 border-t border-white/10 bg-[#101019] px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"><p className="text-sm leading-6 text-zinc-300">สมาชิกส่งคำขอข้อความถึงคุณ คุณสามารถยอมรับเพื่อเริ่มสนทนา หรือปฏิเสธได้</p><div className="mt-3 flex gap-2"><button disabled={busy} onClick={()=>void respond(true)} className="flex-1 rounded-xl bg-purple-600 px-4 py-3 text-sm font-semibold disabled:opacity-50">ยอมรับคำขอ</button><button disabled={busy} onClick={()=>void respond(false)} className="rounded-xl border border-white/10 px-4 py-3 text-sm">ปฏิเสธ</button></div></div>}
+    {isAccepted && <div className="flex shrink-0 gap-2 border-t border-white/10 bg-[#101019] px-3 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"><input value={body} onChange={e=>handleBodyChange(e.target.value)} maxLength={2000} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void send();}}} placeholder="พิมพ์ข้อความ..." className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm outline-none focus:border-purple-400"/><button disabled={busy||!body.trim()} onClick={()=>void send()} className="rounded-xl bg-purple-600 px-4 text-sm font-semibold disabled:opacity-50">ส่ง</button></div>}
+    {status==="pending"&&!incoming&&<p className="shrink-0 border-t border-white/10 px-4 py-4 text-center text-sm text-zinc-400">ส่งคำขอแล้ว รออีกฝ่ายยอมรับก่อนจึงจะส่งข้อความเพิ่มเติมได้</p>}
+    {status==="declined"&&<p className="shrink-0 border-t border-white/10 px-4 py-4 text-center text-sm text-zinc-400">คำขอนี้ถูกปฏิเสธแล้ว</p>}
+    {error&&<p role="alert" className="shrink-0 px-4 py-2 text-sm text-red-300">{error}</p>}
   </section>;
 }
