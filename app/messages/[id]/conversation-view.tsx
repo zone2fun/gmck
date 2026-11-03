@@ -27,7 +27,14 @@ export default function ConversationView({conversationId,status,incoming,userId,
 
   useEffect(()=>{messagesEndRef.current?.scrollIntoView({behavior:"smooth",block:"end"});},[messages.length,otherTyping]);
 
-  useEffect(()=>{\n    let active=true;\n    const imageMessages=messages.filter(m=>imagePath(m.body)&&!imageUrls[m.id]);\n    if(imageMessages.length){\n      void Promise.all(imageMessages.map(async m=>{const path=imagePath(m.body)!;const {data}=await supabase.storage.from("gmck-chat-images").createSignedUrl(path,1800);return [m.id,data?.signedUrl??""] as const;})).then(entries=>{if(active)setImageUrls(current=>({...current,...Object.fromEntries(entries.filter(([,url])=>url))}));});\n    }\n    return ()=>{active=false;};\n  },[messages,imageUrls,supabase]);
+  useEffect(()=>{
+    let active=true;
+    const imageMessages=messages.filter(m=>imagePath(m.body)&&!imageUrls[m.id]);
+    if(imageMessages.length){
+      void Promise.all(imageMessages.map(async m=>{const path=imagePath(m.body)!;const {data}=await supabase.storage.from("gmck-chat-images").createSignedUrl(path,1800);return [m.id,data?.signedUrl??""] as const;})).then(entries=>{if(active)setImageUrls(current=>({...current,...Object.fromEntries(entries.filter(([,url])=>url))}));});
+    }
+    return ()=>{active=false;};
+  },[messages,imageUrls,supabase]);
 
   useEffect(()=>{
     if(status==="declined") return;
