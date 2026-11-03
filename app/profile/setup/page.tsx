@@ -12,7 +12,7 @@ export default async function ProfileSetupPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname,birth_date,height_cm,body_type,interests,relationship_goal,bio,avatar_path")
+    .select("nickname,birth_date,height_cm,body_type,interests,relationship_goal,bio,avatar_path,is_discoverable")
     .eq("id", userId)
     .maybeSingle();
 
