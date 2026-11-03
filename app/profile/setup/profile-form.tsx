@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const interestOptions = ["ออกกำลังกาย", "ท่องเที่ยว", "ดูหนัง/ซีรีส์", "เกม", "ดนตรี", "อาหาร", "ธรรมชาติ", "คาเฟ่", "เทคโนโลยี"];
 const bodyOptions = [
   ["slim", "ผอม"], ["average", "สมส่วน"], ["athletic", "นักกีฬา"], ["muscular", "มีกล้าม"],
-  ["stocky", "หุ่นใหญ่"], ["prefer_not_to_say", "ไม่ระบุ"],
+  ["stocky", "หุ่นใหญ่"], ["prefer_not_say", "ไม่ระบุ"],
 ];
 const goalOptions = [
   ["friends", "หาเพื่อน"], ["chat", "พูดคุย"], ["casual", "ความสัมพันธ์แบบสบาย ๆ"],
-  ["dating", "เดต"], ["long_term", "ความสัมพันธ์จริงจัง"], ["not_sure", "ยังไม่แน่ใจ"],
+  ["dating", "เดต"], ["long_term", "ความสัมพันธ์จริงจัง"], ["open_to_all", "ยังไม่แน่ใจ"],
 ];
 
 type ExistingProfile = {
@@ -20,19 +20,19 @@ type ExistingProfile = {
   body_type: string | null;
   interests: string[];
   relationship_goal: string | null;
-  about_me: string | null;
+  bio: string;
   avatar_path: string | null;
 };
 
 export default function ProfileForm({ userId, initialProfile }: { userId: string; initialProfile: ExistingProfile | null }) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [nickname, setNickname] = useState(initialProfile?.nickname ?? "");
   const [birthDate, setBirthDate] = useState(initialProfile?.birth_date ?? "");
   const [height, setHeight] = useState(initialProfile?.height_cm?.toString() ?? "");
   const [bodyType, setBodyType] = useState(initialProfile?.body_type ?? "");
   const [interests, setInterests] = useState<string[]>(initialProfile?.interests ?? []);
   const [goal, setGoal] = useState(initialProfile?.relationship_goal ?? "");
-  const [about, setAbout] = useState(initialProfile?.about_me ?? "");
+  const [about, setAbout] = useState(initialProfile?.bio ?? "");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState("");
   const [avatarPath, setAvatarPath] = useState(initialProfile?.avatar_path ?? "");
@@ -92,7 +92,7 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
         body_type: bodyType || null,
         interests,
         relationship_goal: goal || null,
-        about_me: about.trim() || null,
+        bio: about.trim(),
         avatar_path: nextAvatarPath,
         profile_completed: true,
         updated_at: new Date().toISOString(),
