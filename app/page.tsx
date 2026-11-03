@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 const features = [
   { icon: "⌖", title: "เริ่มจากคนใกล้คุณ", detail: "เลือกค้นหาตามระยะทาง โดยไม่เปิดเผยตำแหน่งจริง" },
@@ -6,7 +8,11 @@ const features = [
   { icon: "◇", title: "ความปลอดภัยต้องมาก่อน", detail: "ควบคุมความเป็นส่วนตัว บล็อก และรายงานได้" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (typeof data?.claims?.sub === "string") redirect("/home");
+
   return (
     <main className="app-shell flex flex-col">
       <header className="flex items-center justify-between">
