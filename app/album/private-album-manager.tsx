@@ -23,7 +23,7 @@ export default function PrivateAlbumManager({photos:initialPhotos,requests:initi
   const {data,error:dbErr}=await supabase.from("private_album_items").insert({owner_id:user.id,path}).select("id,path,created_at").single();
   if(dbErr){await supabase.storage.from("gmck-private-albums").remove([path]);setError("บันทึกรูปไม่สำเร็จ");setBusy(false);return;}
   const {data:signed}=await supabase.storage.from("gmck-private-albums").createSignedUrl(path,900);
-  setPhotos(current=>[{...dbErr?{}:{},...data,url:signed?.signedUrl??null},...current]);
+  setPhotos(current=>[{...data,url:signed?.signedUrl??null},...current]);
   setNotice("เพิ่มรูปในอัลบั้มแล้ว");setBusy(false);router.refresh();
  }
  async function remove(photo:Photo){
