@@ -74,18 +74,18 @@ export default async function MemberHomePage() {
             <p className="mt-1 text-xs leading-5 text-zinc-400">เลือกช่วงระยะค้นหาและตั้งค่าสิทธิ์ตำแหน่ง</p>
             <span className="mt-3 inline-block text-xs text-purple-300">ตั้งค่า Nearby →</span>
           </Link>
-          <div className="panel p-4">
+          <Link href="/discover" className="panel block p-4 transition hover:border-purple-300/40">
             <span className="text-2xl text-purple-300">♡</span>
             <h3 className="mt-3 font-semibold">ค้นหาสมาชิก</h3>
             <p className="mt-1 text-xs leading-5 text-zinc-400">ค้นหาคนที่มีความสนใจตรงกัน</p>
-            <span className="mt-3 inline-block text-xs text-purple-300">กำลังพัฒนา</span>
-          </div>
-          <div className="panel p-4">
+            <span className="mt-3 inline-block text-xs text-purple-300">ค้นหาตอนนี้ →</span>
+          </Link>
+          <Link href="/messages" className="panel block p-4 transition hover:border-purple-300/40">
             <span className="text-2xl text-purple-300">✉</span>
             <h3 className="mt-3 font-semibold">ข้อความ</h3>
             <p className="mt-1 text-xs leading-5 text-zinc-400">พูดคุยและจัดการคำขอข้อความ</p>
-            <span className="mt-3 inline-block text-xs text-purple-300">กำลังพัฒนา</span>
-          </div>
+            <span className="mt-3 inline-block text-xs text-purple-300">เปิดข้อความ →</span>
+          </Link>
           <div className="panel p-4">
             <span className="text-2xl text-purple-300">◇</span>
             <h3 className="mt-3 font-semibold">ความปลอดภัย</h3>
