@@ -18,9 +18,15 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
   const {data:profile}=await supabase.rpc("get_discoverable_profile",{p_member_id:otherId});
   const {data:messages}=await supabase.from("messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true});
   const otherName=profile?.[0]?.nickname ?? "สมาชิก GMCK";
-  return <main className="app-shell">
-    <header className="flex items-center justify-between"><Link href="/messages" className="text-sm text-purple-200 underline">← ข้อความ</Link><Link href={"/profile/"+otherId} className="text-sm text-purple-200 underline">ดูโปรไฟล์</Link></header>
-    <section className="mt-7"><p className="text-xs tracking-[.2em] text-purple-300">CONVERSATION</p><h1 className="mt-2 text-2xl font-semibold">{otherName}</h1><p className="mt-1 text-xs text-zinc-500">{c.status==="accepted"?"บทสนทนาที่เปิดแล้ว":c.status==="pending"?(c.recipient_id===userId?"คำขอข้อความใหม่":"รออีกฝ่ายตอบรับคำขอ"):"คำขอนี้ถูกปฏิเสธ"}</p></section>
+  return <main className="fixed inset-0 mx-auto flex h-[100dvh] w-full max-w-[720px] flex-col overflow-hidden bg-[#09090f]">
+    <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 pt-[calc(env(safe-area-inset-top)+12px)]">
+      <Link href="/messages" className="text-sm text-purple-200">← ข้อความ</Link>
+      <div className="min-w-0 flex-1 px-3 text-center">
+        <h1 className="truncate text-base font-semibold">{otherName}</h1>
+        <p className="text-[11px] text-zinc-500">{c.status==="accepted"?"บทสนทนา":c.status==="pending"?(c.recipient_id===userId?"คำขอข้อความใหม่":"รอการตอบรับ"):"คำขอถูกปฏิเสธ"}</p>
+      </div>
+      <Link href={"/profile/"+otherId} className="text-sm text-purple-200">โปรไฟล์</Link>
+    </header>
     <ConversationView conversationId={id} status={c.status} incoming={c.recipient_id===userId&&c.status==="pending"} userId={userId} initialMessages={(messages??[]) as Message[]}/>
   </main>;
 }
