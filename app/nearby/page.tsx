@@ -164,6 +164,7 @@ export default function NearbyPage() {
               <h3 className="text-lg font-semibold">{member.nickname}, {member.age}</h3>
               <p className="mt-1 text-xs text-zinc-400">{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ") || "ยังไม่ได้ระบุข้อมูลเพิ่มเติม"}</p>
             </div><span className="pill shrink-0 rounded-full px-3 py-1 text-xs">{member.distance_label}</span></div>
+            </div>
             {member.relationship_goal && <p className="mt-3 text-xs text-purple-200">{goalLabels[member.relationship_goal] ?? member.relationship_goal}</p>}
             {member.bio && <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-300">{member.bio}</p>}
             {!!member.interests?.length && <div className="mt-3 flex flex-wrap gap-2">{member.interests.map((interest) => <span key={interest} className="pill rounded-full px-3 py-1 text-xs">{interest}</span>)}</div>}
