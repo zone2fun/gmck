@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ConversationView from "./conversation-view";
+import MemberSafetyActions from "@/components/member-safety-actions";
 
 type Conversation = { id: string; requester_id: string; recipient_id: string; status: "pending"|"accepted"|"declined" };
 type Message = { id: string; sender_id: string; body: string; created_at: string };
@@ -27,6 +28,7 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
       </div>
       <Link href={"/profile/"+otherId} className="text-sm text-purple-200">โปรไฟล์</Link>
     </header>
+    <div className="shrink-0 border-b border-white/10 px-4 py-1"><MemberSafetyActions memberId={otherId} returnTo="/messages"/></div>
     <ConversationView conversationId={id} status={c.status} incoming={c.recipient_id===userId&&c.status==="pending"} userId={userId} initialMessages={(messages??[]) as Message[]}/>
   </main>;
 }
