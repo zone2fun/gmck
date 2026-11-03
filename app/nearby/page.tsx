@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const radii = [1, 5, 10, 25, 50, 100] as const;
 type Member = {
-  member_id: string; nickname: string; age: number; height_cm: number | null;
+  member_id: string; nickname: string; age: number; height_cm: number | null; avatar_path: string | null; avatar_url?: string | null;
   body_type: string | null; interests: string[] | null;
   relationship_goal: string | null; bio: string | null; distance_label: string;
 };
@@ -38,7 +38,13 @@ export default function NearbyPage() {
         ? "ยังไม่มีตำแหน่งล่าสุด กดรีเฟรชเพื่อแชร์ตำแหน่งปัจจุบัน"
         : "ค้นหาสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } else {
-      setMembers((data ?? []) as Member[]);
+      const rows = (data ?? []) as Member[];
+      const withAvatars = await Promise.all(rows.map(async (member) => {
+        if (!member.avatar_path) return { ...member, avatar_url: null };
+        const { data: imageData } = await supabase.storage.from("profile-photos").createSignedUrl(member.avatar_path, 30 * 60);
+        return { ...member, avatar_url: imageData?.signedUrl ?? null };
+      }));
+      setMembers(withAvatars);
       if (!data?.length) setNotice("ยังไม่พบสมาชิกในระยะนี้ที่เปิด Nearby และเปิดให้ค้นพบโปรไฟล์");
     }
     setBusy(false);
@@ -149,7 +155,12 @@ export default function NearbyPage() {
         {!busy && members.length === 0 && <div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองขยายรัศมีหรือกลับมาดูอีกครั้ง</div>}
         <div className="mt-4 space-y-3">
           {members.map((member) => <article key={member.member_id} className="panel p-5">
-            <div className="flex items-start justify-between gap-3"><div>
+            <div className="flex items-start gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-purple-500/15 text-2xl font-semibold text-purple-200">
+                {member.avatar_url ? <img src={member.avatar_url} alt="รูปโปรไฟล์" className="h-full w-full object-cover" /> : member.nickname.slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
               <h3 className="text-lg font-semibold">{member.nickname}, {member.age}</h3>
               <p className="mt-1 text-xs text-zinc-400">{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ") || "ยังไม่ได้ระบุข้อมูลเพิ่มเติม"}</p>
             </div><span className="pill shrink-0 rounded-full px-3 py-1 text-xs">{member.distance_label}</span></div>
