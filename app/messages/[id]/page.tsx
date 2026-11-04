@@ -20,8 +20,6 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
   const {data:profile}=await supabase.rpc("get_discoverable_profile",{p_member_id:otherId});
   const {data:albumAccess}=await supabase.from("private_album_access").select("status").eq("owner_id",otherId).eq("viewer_id",userId).maybeSingle();
   const {data:albumRequest}=await supabase.from("private_album_access").select("status").eq("owner_id",userId).eq("viewer_id",otherId).maybeSingle();
-  const albumStatus=c.recipient_id===userId?(albumRequest?.status??"none"):(albumAccess?.status??"none");
-  const isAlbumOwner=c.recipient_id===userId;
   const {data:messages}=await supabase.from("messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true});
   const otherName=profile?.[0]?.nickname ?? "สมาชิก GMCK";
   return <main className="chat-page fixed inset-0 mx-auto flex h-[100dvh] w-full max-w-[720px] flex-col overflow-hidden bg-[#09090f]">
@@ -34,7 +32,7 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
       <Link href={"/profile/"+otherId} className="text-sm text-purple-200">โปรไฟล์</Link>
     </header>
     <div className="shrink-0 border-b border-white/10 px-4 py-1"><MemberSafetyActions memberId={otherId} returnTo="/messages"/></div>
-    <ChatAlbumAccess ownerId={isAlbumOwner?userId:otherId} otherId={otherId} isOwner={isAlbumOwner} initialStatus={albumStatus} conversationAccepted={c.status==="accepted"}/>
+    <ChatAlbumAccess ownerId={userId} otherId={otherId} incomingStatus={albumRequest?.status??"none"} outgoingStatus={albumAccess?.status??"none"} conversationAccepted={c.status==="accepted"}/>
     <ConversationView conversationId={id} status={c.status} incoming={c.recipient_id===userId&&c.status==="pending"} userId={userId} initialMessages={(messages??[]) as Message[]}/>
   </main>;
 }
