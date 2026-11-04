@@ -11,7 +11,7 @@ const features = [
 export default async function HomePage() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  if (typeof data?.claims?.sub === "string") redirect("/home");
+  if (typeof data?.claims?.sub === "string") redirect("/discover");
 
   return (
     <main className="app-shell flex flex-col">
