@@ -23,8 +23,11 @@ export default function NearbyPage() {
   if(error){setMembers([]);setNotice(error.message.includes("Location unavailable")?"ยังไม่มีตำแหน่งล่าสุด กรุณาอัปเดตตำแหน่งในการตั้งค่า":"ค้นหาสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");}
   else {
    const rows=(data??[]) as Member[];
-   const withAvatars=await Promise.all(rows.map(async m=>{if(!m.avatar_path)return {...m,avatar_url:null};const {data:image}=await supabase.storage.from("profile-photos").createSignedUrl(m.avatar_path,1800);return {...m,avatar_url:image?.signedUrl??null};}));
-   setMembers(withAvatars);if(!rows.length)setNotice("ยังไม่พบสมาชิกในระยะนี้ที่เปิด Nearby และเปิดให้ค้นพบโปรไฟล์");
+   const paths=[...new Set(rows.map(m=>m.avatar_path).filter((p):p is string=>Boolean(p)))];
+   const {data:photos}=paths.length?await supabase.storage.from("profile-photos").createSignedUrls(paths,1800):{data:[]};
+   const photoByPath=new Map((photos??[]).map(photo=>[photo.path,photo.signedUrl]));
+   setMembers(rows.map(m=>({...m,avatar_url:m.avatar_path?photoByPath.get(m.avatar_path)??null:null})));
+   if(!rows.length)setNotice("ยังไม่พบสมาชิกในระยะนี้ที่เปิด Nearby และเปิดให้ค้นพบโปรไฟล์");
   }
   setBusy(false);
  },[radius,supabase]);
