@@ -42,13 +42,11 @@ export default function NearbyPage() {
  useEffect(()=>{let active=true;(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){setNotice("กรุณาเข้าสู่ระบบอีกครั้ง");setLoading(false);return;}
-  const [{data:profile},{data:prefs}]=await Promise.all([
-   supabase.from("profiles").select("nearby_enabled").eq("id",user.id).maybeSingle(),
-   supabase.from("profiles").select("nearby_radius_km").eq("id",user.id).maybeSingle()
-  ]);
+  const {data:profile}=await supabase.from("profiles").select("nearby_enabled").eq("id",user.id).maybeSingle();
   if(!active)return;
   setEnabled(profile?.nearby_enabled??false);
-  if(prefs?.nearby_radius_km) setRadius(prefs.nearby_radius_km);
+  const savedRadius=Number(window.localStorage.getItem("gmck_nearby_radius"));
+  if([1,5,10,25,50,100].includes(savedRadius)) setRadius(savedRadius);
   if(profile?.nearby_enabled) void searchMembers();
   setLoading(false);
  })();return()=>{active=false};},[supabase,searchMembers]);
