@@ -10,7 +10,7 @@ const tabs = [
   { href: "/discover", label: "ค้นหา", icon: "♡", match: ["/discover"] },
   { href: "/messages", label: "ข้อความ", icon: "✉", match: ["/messages"] },
   { href: "/notifications", label: "แจ้งเตือน", icon: "♢", match: ["/notifications"] },
-  { href: "/profile/setup", label: "โปรไฟล์", icon: "◉", match: ["/profile/setup", "/album", "/blocked"] },
+  { href: "/settings", label: "ตั้งค่า", icon: "⚙", match: ["/settings", "/profile/setup", "/album", "/blocked"] },
 ];
 
 export default function MobileTabBar() {
