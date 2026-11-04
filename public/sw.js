@@ -27,3 +27,33 @@ self.addEventListener("notificationclick", (event) => {
     await clients.openWindow(target);
   })());
 });
+
+
+const GMCK_STATIC_CACHE = "gmck-static-v1";
+const GMCK_STATIC_PREFIX = self.location.origin + "/_next/static/";
+
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key.startsWith("gmck-static-") && key !== GMCK_STATIC_CACHE).map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  if (!request.url.startsWith(GMCK_STATIC_PREFIX)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(GMCK_STATIC_CACHE);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  })());
+});
