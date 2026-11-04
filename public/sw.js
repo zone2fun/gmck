@@ -4,8 +4,6 @@ self.addEventListener("push", (event) => {
   const title = data.title || "GMCK";
   const options = {
     body: data.body || "คุณมีการแจ้งเตือนใหม่",
-    icon: data.icon || "/icon-192.png",
-    badge: data.badge || "/icon-192.png",
     data: { url: data.url || "/notifications" },
     vibrate: [100, 50, 100],
     tag: "gmck-" + (data.url || "notification"),
