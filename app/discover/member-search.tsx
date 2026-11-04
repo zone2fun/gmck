@@ -28,12 +28,15 @@ export default function MemberSearch() {
       setError("ค้นหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"); setMembers([]);
     } else {
       const rows = (data ?? []) as Member[];
-      const withPhotos = await Promise.all(rows.map(async member => {
-        if (!member.avatar_path) return { ...member, avatar_url: null };
-        const { data: photo } = await supabase.storage.from("profile-photos").createSignedUrl(member.avatar_path, 1800);
-        return { ...member, avatar_url: photo?.signedUrl ?? null };
-      }));
-      setMembers(withPhotos);
+      const paths = [...new Set(rows.map(member => member.avatar_path).filter((path): path is string => Boolean(path)))];
+      const { data: photos } = paths.length
+        ? await supabase.storage.from("profile-photos").createSignedUrls(paths, 1800)
+        : { data: [] };
+      const photoByPath = new Map((photos ?? []).map(photo => [photo.path, photo.signedUrl]));
+      setMembers(rows.map(member => ({
+        ...member,
+        avatar_url: member.avatar_path ? photoByPath.get(member.avatar_path) ?? null : null,
+      })));
     }
     setLoading(false);
   }
