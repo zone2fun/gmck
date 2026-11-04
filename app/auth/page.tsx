@@ -59,7 +59,7 @@ export default function AuthPage() {
           password,
         });
         if (authError) throw authError;
-        window.location.href = "/welcome";
+        window.location.href = "/nearby";
         return;
       }
     } catch (err) {
