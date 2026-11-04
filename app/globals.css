@@ -24,6 +24,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overscroll-behavior-y: contain; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 ::selection { background: rgba(168,85,247,.35); }
 
 .app-shell { width: min(100%, 480px); min-height: 100svh; margin: 0 auto; padding: 28px 22px 36px; }
@@ -48,7 +52,7 @@ button, input { font: inherit; }
   width: min(100%, 480px); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   padding: 9px 8px calc(9px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(255,255,255,.10);
-  background: rgba(13,12,20,.94); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+  background: rgba(13,12,20,.97); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .mobile-tab { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #8f899d; font-size: 10px; font-weight: 500; text-decoration: none; }
 .mobile-tab-active { color: #d8a8ff; }
