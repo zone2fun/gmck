@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "GMCK",
     short_name: "GMCK",
     description: "Meet nearby, connect genuinely.",
-    start_url: "/",
+    start_url: "/home",
     display: "standalone",
     background_color: "#09090f",
     theme_color: "#09090f",
