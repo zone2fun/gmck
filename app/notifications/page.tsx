@@ -10,7 +10,7 @@ const labels:Record<string,{title:string;href:string}> = {
  message_request:{title:"คุณได้รับคำขอข้อความใหม่",href:"/messages"},
  message_request_accepted:{title:"คำขอข้อความของคุณได้รับการตอบรับ",href:"/messages"},
  message_request_declined:{title:"คำขอข้อความของคุณไม่ได้รับการตอบรับ",href:"/messages"},
- album_access_request:{title:"มีสมาชิกขอเข้าดูอัลบั้มส่วนตัว",href:"/album"},
+ album_access_request:{title:"มีสมาชิกขอเข้าดูอัลบั้มส่วนตัว",href:"/album#requests"},
  album_access_approved:{title:"คำขอเข้าดูอัลบั้มส่วนตัวได้รับอนุมัติ",href:"/album"},
  album_access_revoked:{title:"สิทธิ์เข้าดูอัลบั้มส่วนตัวมีการเปลี่ยนแปลง",href:"/album"},
 };
