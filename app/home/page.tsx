@@ -24,6 +24,7 @@ export default async function MemberHomePage() {
     .maybeSingle();
 
   if (!profile?.profile_completed) redirect("/profile/setup");
+  redirect("/discover");
 
   let avatarUrl: string | null = null;
   if (profile.avatar_path) {
