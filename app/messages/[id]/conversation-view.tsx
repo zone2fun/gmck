@@ -114,7 +114,7 @@ export default function ConversationView({conversationId,status,incoming,userId,
     if(sendError){await supabase.storage.from("gmck-chat-images").remove([path]);setError("ส่งรูปภาพไม่สำเร็จ กรุณาลองใหม่");setUploading(false);return;}
     const message:Message={id:data,sender_id:userId,body:"[[image:"+path+"]]",created_at:new Date().toISOString()};
     setMessages(current=>current.some(m=>m.id===data)?current:[...current,message]);
-    setUploading(false);router.refresh();
+    setUploading(false);
   }
   async function send() {
     const message=body.trim();
@@ -123,7 +123,7 @@ export default function ConversationView({conversationId,status,incoming,userId,
     const {data,error:e}=await supabase.rpc("send_conversation_message",{p_conversation_id:conversationId,p_body:message});
     if(e){setError("ส่งข้อความไม่สำเร็จ กรุณาลองใหม่");setBusy(false);return;}
     setMessages(current=>current.some(m=>m.id===data)?current:[...current,{id:data,sender_id:userId,body:message,created_at:new Date().toISOString()}]);
-    setBody("");setBusy(false);void broadcastTyping(false);router.refresh();
+    setBody("");setBusy(false);void broadcastTyping(false);
   }
   return <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-2 text-xs">
