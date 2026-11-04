@@ -17,6 +17,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { data, error } = await supabase.rpc("get_discoverable_profile", { p_member_id: id });
   if (error || !data?.length) notFound();
   const profile = data[0] as Profile;
+  const { data: conversations } = await supabase.rpc("get_my_conversations");
+  const existingConversation = ((conversations ?? []) as { conversation_id: string; other_user_id: string; status: "pending" | "accepted" | "declined"; is_incoming_request: boolean }[])
+    .find((item) => item.other_user_id === profile.member_id);
   let avatarUrl: string | null = null;
   if (profile.avatar_path) {
     const { data: photo } = await supabase.storage.from("profile-photos").createSignedUrl(profile.avatar_path, 1800);
@@ -32,7 +35,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       {profile.bio && <div className="mt-6"><h2 className="font-semibold">เกี่ยวกับฉัน</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-zinc-300">{profile.bio}</p></div>}
       {!!profile.interests?.length && <div className="mt-6"><h2 className="font-semibold">ความสนใจ</h2><div className="mt-3 flex flex-wrap gap-2">{profile.interests.map((x) => <span key={x} className="pill rounded-full px-3 py-2 text-xs">{x}</span>)}</div></div>}
     </section>
-    <MessageRequestButton recipientId={profile.member_id}/>
+    <MessageRequestButton recipientId={profile.member_id} conversationId={existingConversation?.conversation_id ?? null} conversationStatus={existingConversation?.status ?? null} isIncomingRequest={existingConversation?.is_incoming_request ?? false}/>
     <PrivateAlbumAccessButton ownerId={profile.member_id}/>
     <MemberSafetyActions memberId={profile.member_id} returnTo="/discover"/>
     <p className="mt-5 text-center text-xs leading-6 text-zinc-500">ส่งข้อความแรกได้ 1 ข้อความ สมาชิกอีกฝ่ายต้องยอมรับคำขอก่อนจึงจะสนทนาต่อได้</p>
