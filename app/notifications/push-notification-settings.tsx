@@ -47,7 +47,12 @@ export default function PushNotificationSettings() {
       }
 
       const supabase = createClient();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error("กรุณาเข้าสู่ระบบ GMCK ใหม่ แล้วลองอีกครั้ง");
+
       const { error } = await supabase.from("push_subscriptions").upsert({
+        user_id: user.id,
         endpoint: subscription.endpoint,
         subscription: subscription.toJSON(),
         user_agent: navigator.userAgent,
@@ -56,7 +61,13 @@ export default function PushNotificationSettings() {
       setEnabled(true);
       setMessage("เปิดรับการแจ้งเตือนบนอุปกรณ์นี้แล้ว");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
+      const detail =
+        error && typeof error === "object" && "message" in error
+          ? String((error as { message: unknown }).message)
+          : error instanceof Error
+            ? error.message
+            : JSON.stringify(error);
+      setMessage(detail || "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาลองอีกครั้ง");
     } finally {
       setBusy(false);
     }
