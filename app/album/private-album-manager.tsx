@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Photo={id:string;path:string;created_at:string;url:string|null};
-type Request={viewer_id:string;nickname:string;requested_at:string};
+type Request={viewer_id:string;nickname:string;requested_at:string;avatar_url:string|null};
 type Member={viewer_id:string;nickname:string;approved_at:string};
 
 export default function PrivateAlbumManager({photos:initialPhotos,requests:initialRequests,members:initialMembers}:{photos:Photo[];requests:Request[];members:Member[]}) {
@@ -55,8 +55,8 @@ export default function PrivateAlbumManager({photos:initialPhotos,requests:initi
    <p className="mt-2 text-[11px] text-zinc-500">JPG, PNG หรือ WebP ไม่เกิน 5 MB ต่อรูป</p>
    {photos.length? <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">{photos.map(photo=><div key={photo.id} className="overflow-hidden rounded-xl border border-white/10">{photo.url?<img src={photo.url} alt="รูปในอัลบั้มส่วนตัว" className="aspect-square w-full object-cover"/>:<div className="aspect-square bg-white/5"/>}<button disabled={busy} onClick={()=>void remove(photo)} className="w-full py-2 text-xs text-red-300">ลบรูป</button></div>)}</div>:<p className="mt-5 text-sm text-zinc-500">ยังไม่มีรูปในอัลบั้ม</p>}
   </section>
-  <section className="panel p-5"><h2 className="font-semibold">คำขอเข้าดูอัลบั้ม {requests.length>0&&<span className="text-purple-300">({requests.length})</span>}</h2>
-   {requests.length?requests.map(r=><div key={r.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium">{r.nickname}</p><p className="text-xs text-zinc-500">ขอเข้าถึงอัลบั้ม</p></div><button disabled={busy} onClick={()=>void respond(r.viewer_id,false)} className="rounded-lg border border-white/10 px-3 py-2 text-xs">ปฏิเสธ</button><button disabled={busy} onClick={()=>void respond(r.viewer_id,true)} className="rounded-lg bg-purple-600 px-3 py-2 text-xs">อนุมัติ</button></div>):<p className="mt-3 text-sm text-zinc-500">ไม่มีคำขอใหม่</p>}
+  <section id="requests" className="panel scroll-mt-6 p-5"><h2 className="font-semibold">คำขอเข้าดูอัลบั้ม {requests.length>0&&<span className="text-purple-300">({requests.length})</span>}</h2>
+   {requests.length?requests.map(r=><div key={r.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><a href={"/profile/"+r.viewer_id} className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-purple-500/15" aria-label={"ดูโปรไฟล์ "+r.nickname}>{r.avatar_url?<img src={r.avatar_url} alt="" className="h-full w-full object-cover"/>:<span className="flex h-full items-center justify-center text-lg text-purple-200">{r.nickname.slice(0,1)}</span>}</a><div className="min-w-0 flex-1"><a href={"/profile/"+r.viewer_id} className="text-sm font-medium hover:text-purple-200">{r.nickname}</a><p className="text-xs text-zinc-500">ขอเข้าถึงอัลบั้ม</p></div><button disabled={busy} onClick={()=>void respond(r.viewer_id,false)} className="rounded-lg border border-white/10 px-3 py-2 text-xs">ปฏิเสธ</button><button disabled={busy} onClick={()=>void respond(r.viewer_id,true)} className="rounded-lg bg-purple-600 px-3 py-2 text-xs">อนุมัติ</button></div>):<p className="mt-3 text-sm text-zinc-500">ไม่มีคำขอใหม่</p>}
   </section>
   <section className="panel p-5"><h2 className="font-semibold">สมาชิกที่อนุมัติแล้ว</h2>
    {members.length?members.map(m=><div key={m.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><p className="min-w-0 flex-1 truncate text-sm">{m.nickname}</p><button disabled={busy} onClick={()=>void revoke(m.viewer_id)} className="text-xs text-red-300 underline">เพิกถอนสิทธิ์</button></div>):<p className="mt-3 text-sm text-zinc-500">ยังไม่มีสมาชิกที่ได้รับอนุมัติ</p>}
