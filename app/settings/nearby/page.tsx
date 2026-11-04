@@ -27,6 +27,8 @@ export default function NearbySettingsPage() {
   }, [supabase]);
 
   useEffect(() => {
+    const savedRadius = Number(window.localStorage.getItem("gmck_nearby_radius"));
+    if ([1, 5, 10, 25, 50, 100].includes(savedRadius)) setRadius(savedRadius);
     let active = true;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -62,7 +64,7 @@ export default function NearbySettingsPage() {
     <section className="mt-8"><p className="text-xs tracking-[.2em] text-purple-300">NEARBY PREFERENCES</p><h1 className="glow mt-2 text-3xl font-semibold">ตั้งค่า Nearby</h1><p className="mt-2 text-sm leading-6 text-zinc-400">กำหนดระยะค้นหาและควบคุมการใช้ตำแหน่งได้จากที่นี่</p></section>
     <section className="panel mt-6 p-5">
       <h2 className="font-semibold">ระยะค้นหา</h2><p className="mt-1 text-xs text-zinc-400">ใช้กำหนดรัศมีสมาชิกที่แสดงในหน้าใกล้ฉัน</p>
-      <div className="mt-4 grid grid-cols-3 gap-2">{radii.map(value => <button key={value} type="button" onClick={() => setRadius(value)} aria-pressed={radius===value} className={`rounded-xl border px-3 py-3 text-sm ${radius===value ? "border-purple-400 bg-purple-500/20 text-purple-100" : "border-white/10 bg-white/5 text-zinc-300"}`}>{value} กม.</button>)}</div>
+      <div className="mt-4 grid grid-cols-3 gap-2">{radii.map(value => <button key={value} type="button" onClick={() => { setRadius(value); window.localStorage.setItem("gmck_nearby_radius", String(value)); }} aria-pressed={radius===value} className={`rounded-xl border px-3 py-3 text-sm ${radius===value ? "border-purple-400 bg-purple-500/20 text-purple-100" : "border-white/10 bg-white/5 text-zinc-300"}`}>{value} กม.</button>)}</div>
       <p className="mt-3 text-xs text-zinc-500">ระยะที่เลือก: {radius} กิโลเมตร</p>
     </section>
     <section className="panel mt-4 p-5">
