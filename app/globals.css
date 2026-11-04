@@ -74,3 +74,7 @@ button, input { font: inherit; }
 .member-tile-interests { min-height: 31px; display: flex; align-items: center; gap: 5px; padding: 6px 8px; overflow: hidden; }
 .member-tile-interests span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 999px; background: rgba(168,85,247,.12); padding: 3px 7px; color: #d8b4fe; font-size: 10px; }
 @media (min-width: 420px) { .member-grid { gap: 12px; } }
+
+
+/* Keep chat composer clear of the persistent app navigation. */
+body:has(.chat-page) .mobile-tabbar { display: none; }
