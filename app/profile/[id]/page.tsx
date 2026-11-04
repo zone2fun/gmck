@@ -17,14 +17,15 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { data, error } = await supabase.rpc("get_discoverable_profile", { p_member_id: id });
   if (error || !data?.length) notFound();
   const profile = data[0] as Profile;
-  const { data: conversations } = await supabase.rpc("get_my_conversations");
+  const [{ data: conversations }, { data: photo }] = await Promise.all([
+    supabase.rpc("get_my_conversations"),
+    profile.avatar_path
+      ? supabase.storage.from("profile-photos").createSignedUrl(profile.avatar_path, 1800)
+      : Promise.resolve({ data: null }),
+  ]);
   const existingConversation = ((conversations ?? []) as { conversation_id: string; other_user_id: string; status: "pending" | "accepted" | "declined"; is_incoming_request: boolean }[])
     .find((item) => item.other_user_id === profile.member_id);
-  let avatarUrl: string | null = null;
-  if (profile.avatar_path) {
-    const { data: photo } = await supabase.storage.from("profile-photos").createSignedUrl(profile.avatar_path, 1800);
-    avatarUrl = photo?.signedUrl ?? null;
-  }
+  const avatarUrl = photo?.signedUrl ?? null;
   return <main className="app-shell">
     <header className="flex items-center justify-between"><Link href="/discover" className="text-sm text-purple-200 underline">← กลับไปค้นหา</Link><Link href="/messages" className="text-sm text-purple-200 underline">ข้อความ</Link></header>
     <section className="panel mt-8 p-6">
