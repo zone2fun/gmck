@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import MobileTabBar from "@/components/mobile-tab-bar";
+import PwaRegister from "@/components/pwa-register";
 
 export const metadata: Metadata = {
   title: "GMCK — Meet nearby, connect genuinely",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   applicationName: "GMCK",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "GMCK" },
+  icons: { icon: "/gmck-icon.svg", shortcut: "/gmck-icon.svg" },
 };
 
 export const viewport: Viewport = {
@@ -15,5 +17,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="th"><body>{children}<MobileTabBar /></body></html>;
+  return <html lang="th"><body>{children}<MobileTabBar /><PwaRegister /></body></html>;
 }
