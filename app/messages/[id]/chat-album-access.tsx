@@ -1,11 +1,37 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+
+type AccessRow = { owner_id: string; viewer_id: string; status: string };
+
 export default function ChatAlbumAccess({ownerId,otherId,incomingStatus,outgoingStatus,conversationAccepted}:{ownerId:string;otherId:string;incomingStatus:string;outgoingStatus:string;conversationAccepted:boolean}) {
- const supabase=createClient();const router=useRouter();
- const [incoming,setIncoming]=useState(incomingStatus);const [outgoing,setOutgoing]=useState(outgoingStatus);
- const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");
+ const supabase=useMemo(()=>createClient(),[]);
+ const router=useRouter();
+ const [incoming,setIncoming]=useState(incomingStatus);
+ const [outgoing,setOutgoing]=useState(outgoingStatus);
+ const [busy,setBusy]=useState(false);
+ const [message,setMessage]=useState("");
+
+ useEffect(()=>{
+  setIncoming(incomingStatus);
+  setOutgoing(outgoingStatus);
+ },[incomingStatus,outgoingStatus]);
+
+ useEffect(()=>{
+  const channel=supabase
+   .channel("chat-album-access-"+[ownerId,otherId].sort().join("-"))
+   .on("postgres_changes",{event:"*",schema:"public",table:"private_album_access"},(payload)=>{
+    const row=(payload.new??payload.old) as AccessRow;
+    if(!row?.owner_id||!row?.viewer_id) return;
+    if(row.owner_id===ownerId&&row.viewer_id===otherId) setIncoming(row.status??"none");
+    if(row.owner_id===otherId&&row.viewer_id===ownerId) setOutgoing(row.status??"none");
+   })
+   .subscribe();
+  return ()=>{void supabase.removeChannel(channel);};
+ },[supabase,ownerId,otherId]);
+
  async function request(){setBusy(true);setMessage("");const {data,error}=await supabase.rpc("request_private_album_access",{p_owner_id:otherId});if(error){setMessage(error.message.includes("accepted conversation")?"ต้องยอมรับคำขอข้อความก่อนจึงจะขออัลบั้มได้":"ส่งคำขอไม่สำเร็จ");}else{setOutgoing(typeof data==="string"?data:"pending");setMessage(data==="approved"?"ได้รับอนุญาตแล้ว":"ส่งคำขอแล้ว");router.refresh();}setBusy(false);}
  async function respond(approve:boolean){setBusy(true);setMessage("");const {data,error}=await supabase.rpc("respond_private_album_access",{p_viewer_id:otherId,p_approve:approve});if(error||data!==true){setMessage("ดำเนินการไม่สำเร็จ");setBusy(false);return;}setIncoming(approve?"approved":"revoked");setMessage(approve?"อนุมัติแล้ว":"ยกเลิกคำขอแล้ว");setBusy(false);router.refresh();}
  async function cancel(){setBusy(true);setMessage("");const {data,error}=await supabase.rpc("cancel_private_album_access_request",{p_owner_id:otherId});if(error||data!==true){setMessage("ยกเลิกคำขอไม่สำเร็จ");setBusy(false);return;}setOutgoing("revoked");setMessage("ยกเลิกคำขอแล้ว");setBusy(false);router.refresh();}
