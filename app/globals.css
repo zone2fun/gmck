@@ -41,3 +41,20 @@ button, input { font: inherit; }
   box-shadow: 0 24px 70px rgba(0,0,0,.24);
 }
 .pill { border: 1px solid rgba(192,132,252,.28); background: rgba(168,85,247,.10); color: #dfc2ff; }
+
+.app-shell { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
+.mobile-tabbar {
+  position: fixed; z-index: 50; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: min(100%, 480px); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 9px 8px calc(9px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255,255,255,.10);
+  background: rgba(13,12,20,.94); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+}
+.mobile-tab { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #8f899d; font-size: 10px; font-weight: 500; text-decoration: none; }
+.mobile-tab-active { color: #d8a8ff; }
+.mobile-tab-icon-wrap { position: relative; display: grid; place-items: center; min-height: 25px; }
+.mobile-tab-icon { font-size: 22px; line-height: 1; }
+.mobile-tab-badge { position: absolute; left: 14px; top: -7px; min-width: 16px; height: 16px; padding: 0 4px; display: grid; place-items: center; border-radius: 999px; background: #d946ef; color: white; font-size: 9px; font-weight: 700; }
+@media (min-width: 700px) {
+  .mobile-tabbar { bottom: 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding-bottom: 9px; box-shadow: 0 12px 45px rgba(0,0,0,.5); }
+}
