@@ -39,7 +39,13 @@ export default function ConversationView({conversationId,status,incoming,userId,
     let active=true;
     const imageMessages=messages.filter(m=>imagePath(m.body)&&!imageUrls[m.id]);
     if(imageMessages.length){
-      void Promise.all(imageMessages.map(async m=>{const path=imagePath(m.body)!;const {data}=await supabase.storage.from("gmck-chat-images").createSignedUrl(path,1800);return [m.id,data?.signedUrl??""] as const;})).then(entries=>{if(active)setImageUrls(current=>({...current,...Object.fromEntries(entries.filter(([,url])=>url))}));});
+      const paths=[...new Set(imageMessages.map(m=>imagePath(m.body)!).filter(Boolean))];
+      void supabase.storage.from("gmck-chat-images").createSignedUrls(paths,1800).then(({data})=>{
+        if(!active)return;
+        const urlByPath=new Map((data??[]).map(item=>[item.path,item.signedUrl]));
+        const entries=imageMessages.map(m=>[m.id,urlByPath.get(imagePath(m.body)!)??""] as const);
+        setImageUrls(current=>({...current,...Object.fromEntries(entries.filter(([,url])=>url))}));
+      });
     }
     return ()=>{active=false;};
   },[messages,imageUrls,supabase]);
