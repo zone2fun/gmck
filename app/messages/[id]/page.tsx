@@ -17,10 +17,12 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
   if(!conversation) notFound();
   const c=conversation as Conversation;
   const otherId=c.requester_id===userId?c.recipient_id:c.requester_id;
-  const {data:profile}=await supabase.rpc("get_discoverable_profile",{p_member_id:otherId});
-  const {data:albumAccess}=await supabase.from("private_album_access").select("status").eq("owner_id",otherId).eq("viewer_id",userId).maybeSingle();
-  const {data:albumRequest}=await supabase.from("private_album_access").select("status").eq("owner_id",userId).eq("viewer_id",otherId).maybeSingle();
-  const {data:messages}=await supabase.from("messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true});
+  const [{data:profile},{data:albumAccess},{data:albumRequest},{data:messages}]=await Promise.all([
+    supabase.rpc("get_discoverable_profile",{p_member_id:otherId}),
+    supabase.from("private_album_access").select("status").eq("owner_id",otherId).eq("viewer_id",userId).maybeSingle(),
+    supabase.from("private_album_access").select("status").eq("owner_id",userId).eq("viewer_id",otherId).maybeSingle(),
+    supabase.from("messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true}),
+  ]);
   const otherName=profile?.[0]?.nickname ?? "สมาชิก GMCK";
   return <main className="chat-page fixed inset-0 mx-auto flex h-[100dvh] w-full max-w-[720px] flex-col overflow-hidden bg-[#09090f]">
     <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 pt-[calc(env(safe-area-inset-top)+12px)]">
