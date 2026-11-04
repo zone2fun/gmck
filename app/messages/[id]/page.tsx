@@ -19,7 +19,7 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
   const {data:profile}=await supabase.rpc("get_discoverable_profile",{p_member_id:otherId});
   const {data:messages}=await supabase.from("messages").select("id,sender_id,body,created_at").eq("conversation_id",id).order("created_at",{ascending:true});
   const otherName=profile?.[0]?.nickname ?? "สมาชิก GMCK";
-  return <main className="fixed inset-0 mx-auto flex h-[100dvh] w-full max-w-[720px] flex-col overflow-hidden bg-[#09090f]">
+  return <main className="chat-page fixed inset-0 mx-auto flex h-[100dvh] w-full max-w-[720px] flex-col overflow-hidden bg-[#09090f]">
     <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 pt-[calc(env(safe-area-inset-top)+12px)]">
       <Link href="/messages" className="text-sm text-purple-200">← ข้อความ</Link>
       <div className="min-w-0 flex-1 px-3 text-center">
