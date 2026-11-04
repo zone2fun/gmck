@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import NotificationsRealtime from "./notifications-realtime";
 import NotificationActions from "./notification-actions";
+import PushNotificationSettings from "./push-notification-settings";
 
 type Notice = { id:string; actor_id:string|null; event_type:string; entity_id:string|null; created_at:string; read_at:string|null };
 const labels:Record<string,{title:string;href:string}> = {
@@ -28,6 +29,7 @@ export default async function NotificationsPage(){
   <header className="flex items-center justify-between"><Link href="/home" className="text-sm text-purple-200 underline">← หน้าแรก</Link><span className="text-lg font-bold tracking-[.18em]">GMCK</span></header>
   <section className="mt-8"><p className="text-xs tracking-[.2em] text-purple-300">ACTIVITY</p><h1 className="glow mt-2 text-3xl font-semibold">การแจ้งเตือน</h1><p className="mt-2 text-sm text-zinc-400">แจ้งเตือนกิจกรรมในบัญชีของคุณ</p></section>
   <NotificationActions/>
+  <PushNotificationSettings/>
   <div className="mt-5 space-y-3">{items.map(item=>{const meta=labels[item.event_type]??{title:"มีกิจกรรมใหม่",href:"/home"};return <Link key={item.id} href={meta.href} className={`panel block p-4 transition hover:border-purple-300/40 ${item.read_at?"opacity-70": "border-purple-400/40"}`}>
    <div className="flex items-start gap-3"><span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-fuchsia-400"/><div className="min-w-0 flex-1"><p className="font-medium">{meta.title}</p><p className="mt-1 text-xs text-zinc-400">{item.actor_id?(names.get(item.actor_id)??"สมาชิก GMCK")+" · ":""}{new Date(item.created_at).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"})}</p></div><span className="text-purple-300">›</span></div>
   </Link>})}</div>
