@@ -36,10 +36,17 @@ export default function NearbyPage() {
   if(!navigator.geolocation){setNotice("เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง");return;}
   setBusy(true);setNotice("กำลังอัปเดตตำแหน่ง...");
   navigator.geolocation.getCurrentPosition(async pos=>{
-   const {error}=await supabase.rpc("update_my_nearby_location",{p_lat:pos.coords.latitude,p_lon:pos.coords.longitude});
-   if(error){setNotice(error.message.includes("wait")?"เพิ่งอัปเดตตำแหน่งไป กรุณารออย่างน้อย 2 นาที":"อัปเดตตำแหน่งไม่สำเร็จ");setBusy(false);return;}
-   await searchMembers();
-  },()=>{setNotice("โปรดอนุญาต Location ให้เว็บไซต์ GMCK");setBusy(false);},{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+   try {
+    const {error}=await supabase.rpc("update_my_nearby_location",{p_lat:pos.coords.latitude,p_lon:pos.coords.longitude});
+    if(error){setNotice(error.message.includes("wait")?"เพิ่งอัปเดตตำแหน่งไป กรุณารออย่างน้อย 2 นาที":"บันทึกตำแหน่งไม่สำเร็จ กรุณาลองอีกครั้ง");setBusy(false);return;}
+    await searchMembers();
+   } catch {
+    setNotice("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตมือถือแล้วลองอีกครั้ง");setBusy(false);
+   }
+  },(error)=>{
+   const message=error.code===1?"ยังไม่ได้รับอนุญาต Location ให้เว็บไซต์ GMCK":error.code===2?"มือถือระบุตำแหน่งไม่ได้ในขณะนี้ กรุณาเปิด Location Services แล้วลองอีกครั้ง":"ใช้เวลาระบุตำแหน่งนานเกินไป ลองอีกครั้งในที่โล่ง";
+   setNotice(message);setBusy(false);
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
  },[searchMembers,supabase]);
 
  useEffect(()=>{let active=true;(async()=>{
