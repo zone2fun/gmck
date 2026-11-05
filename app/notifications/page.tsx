@@ -7,6 +7,7 @@ import PushNotificationSettings from "./push-notification-settings";
 
 type Notice = { id:string; actor_id:string|null; event_type:string; entity_id:string|null; created_at:string; read_at:string|null };
 const labels:Record<string,{title:string;href:string}> = {
+ new_message:{title:"คุณได้รับข้อความใหม่",href:"/messages"},
  message_request:{title:"คุณได้รับคำขอข้อความใหม่",href:"/messages"},
  message_request_accepted:{title:"คำขอข้อความของคุณได้รับการตอบรับ",href:"/messages"},
  message_request_declined:{title:"คำขอข้อความของคุณไม่ได้รับการตอบรับ",href:"/messages"},
