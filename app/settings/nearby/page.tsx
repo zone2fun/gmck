@@ -84,7 +84,7 @@ export default function NearbySettingsPage() {
     </section>
     <section className="panel mt-4 p-5">
       <h2 className="font-semibold">การแชร์ตำแหน่ง Nearby</h2>
-      <p className="mt-2 text-sm leading-6 text-zinc-400">ตำแหน่งจะถูกใช้เมื่อคุณเปิด Nearby และรีเฟรชเท่านั้น ไม่มีการติดตามเบื้องหลัง พิกัดเก็บในพื้นที่ส่วนตัวและหมดอายุภายใน 24 ชั่วโมง สมาชิกอื่นจะเห็นเพียงระยะทางโดยประมาณ</p>
+      <p className="mt-2 text-sm leading-6 text-zinc-400">เมื่อเปิดหน้า Nearby ระบบจะอ่านและอัปเดตตำแหน่งทุก 5 นาทีขณะหน้าเว็บเปิดอยู่ ไม่มีการติดตามเบื้องหลังเมื่อปิดหน้า พิกัดเก็บในพื้นที่ส่วนตัวและหมดอายุภายใน 24 ชั่วโมง สมาชิกอื่นจะเห็นเพียงระยะทางโดยประมาณ</p>
       <p className="mt-4 text-sm">สถานะ: <span className={enabled ? "text-emerald-300" : "text-zinc-400"}>{enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}</span></p>
       <button type="button" onClick={toggleNearby} disabled={loading || busy} className="mt-4 w-full rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-semibold disabled:opacity-50">{loading ? "กำลังโหลด..." : busy ? "กำลังดำเนินการ..." : enabled ? "ปิด Nearby และลบตำแหน่ง" : "ยินยอมและเปิด Nearby"}</button>
       {enabled && <button type="button" onClick={() => void updateLocation()} disabled={busy} className="mt-3 w-full rounded-xl border border-purple-400/40 px-4 py-3 text-sm text-purple-200 disabled:opacity-50">อัปเดตตำแหน่งตอนนี้</button>}
