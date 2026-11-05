@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 
 const radii = [1, 5, 10, 25, 50, 100] as const;
 
+function accuracyLabel(meters:number) {
+  if(meters<=100)return "ดี";
+  if(meters<=1000)return "พอใช้";
+  return "คลาดเคลื่อนสูง";
+}
+
 export default function NearbySettingsPage() {
   const supabase = useMemo(() => createClient(), []);
   const [radius, setRadius] = useState<number>(10);
@@ -13,21 +19,24 @@ export default function NearbySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [accuracy,setAccuracy] = useState<number|null>(null);
 
   const updateLocation = useCallback(async () => {
     if (!navigator.geolocation) { setNotice("เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง"); return; }
     setBusy(true); setNotice("กำลังขอตำแหน่งจากอุปกรณ์...");
     navigator.geolocation.getCurrentPosition(async (position) => {
+      const measuredAccuracy=Math.round(position.coords.accuracy);
+      setAccuracy(measuredAccuracy);
       try {
         const { error } = await supabase.rpc("update_my_nearby_location", { p_lat: position.coords.latitude, p_lon: position.coords.longitude });
-        if (error) setNotice(error.message.includes("wait") ? "เพิ่งอัปเดตตำแหน่งไป กรุณารออย่างน้อย 2 นาที" : "บันทึกตำแหน่งไม่สำเร็จ กรุณาลองอีกครั้ง");
-        else setNotice("อัปเดตตำแหน่งเรียบร้อย กลับไปหน้าใกล้ฉันเพื่อดูสมาชิก");
+        if (error) setNotice(error.message.toLowerCase().includes("wait") ? "เพิ่งอัปเดตตำแหน่งไป กรุณารออย่างน้อย 2 นาที" : "บันทึกตำแหน่งไม่สำเร็จ กรุณาลองอีกครั้ง");
+        else setNotice(measuredAccuracy>1000 ? "บันทึกตำแหน่งแล้ว แต่ความแม่นยำต่ำ ("+measuredAccuracy+" เมตร) กรุณาเปิด Location/Precise Location" : "อัปเดตตำแหน่งเรียบร้อย ความแม่นยำประมาณ "+measuredAccuracy+" เมตร");
       } catch {
-        setNotice("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตมือถือแล้วลองอีกครั้ง");
+        setNotice("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
       }
       setBusy(false);
     }, (error) => {
-      const message = error.code === 1 ? "ยังไม่ได้รับอนุญาต Location ให้เว็บไซต์ GMCK" : error.code === 2 ? "มือถือระบุตำแหน่งไม่ได้ในขณะนี้ กรุณาเปิด Location Services แล้วลองอีกครั้ง" : "ใช้เวลาระบุตำแหน่งนานเกินไป ลองอีกครั้งในที่โล่ง";
+      const message = error.code === 1 ? "ยังไม่ได้รับอนุญาต Location ให้เว็บไซต์ GMCK" : error.code === 2 ? "อุปกรณ์ระบุตำแหน่งไม่ได้ในขณะนี้ กรุณาเปิด Location Services แล้วลองอีกครั้ง" : "ใช้เวลาระบุตำแหน่งนานเกินไป ลองอีกครั้งในที่โล่ง";
       setNotice(message); setBusy(false);
     }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, [supabase]);
@@ -79,6 +88,7 @@ export default function NearbySettingsPage() {
       <p className="mt-4 text-sm">สถานะ: <span className={enabled ? "text-emerald-300" : "text-zinc-400"}>{enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}</span></p>
       <button type="button" onClick={toggleNearby} disabled={loading || busy} className="mt-4 w-full rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-semibold disabled:opacity-50">{loading ? "กำลังโหลด..." : busy ? "กำลังดำเนินการ..." : enabled ? "ปิด Nearby และลบตำแหน่ง" : "ยินยอมและเปิด Nearby"}</button>
       {enabled && <button type="button" onClick={() => void updateLocation()} disabled={busy} className="mt-3 w-full rounded-xl border border-purple-400/40 px-4 py-3 text-sm text-purple-200 disabled:opacity-50">อัปเดตตำแหน่งตอนนี้</button>}
+      {accuracy!==null&&<p className="mt-3 text-xs text-zinc-400">GPS Accuracy: ประมาณ {accuracy.toLocaleString("th-TH")} เมตร · {accuracyLabel(accuracy)}</p>}
       {notice && <p role="status" className="mt-3 text-xs leading-6 text-purple-200">{notice}</p>}
     </section>
     <Link href="/nearby" className="mt-6 block rounded-xl border border-purple-300/30 px-4 py-3 text-center text-sm text-purple-200">กลับไปหน้าสมาชิกใกล้ฉัน</Link>
