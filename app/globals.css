@@ -82,3 +82,11 @@ body { overscroll-behavior-y: contain; }
 
 /* Keep chat composer clear of the persistent app navigation. */
 body:has(.chat-page) .mobile-tabbar { display: none; }
+
+
+/* Compact shared page headers to give the main content more room. */
+.app-shell { padding: 14px 18px calc(104px + env(safe-area-inset-bottom)); }
+.brand-mark { width: 34px; height: 34px; border-radius: 11px; }
+.app-shell > header + section { margin-top: 16px !important; }
+.app-shell > header + section h1 { margin-top: 4px !important; font-size: 1.55rem !important; line-height: 1.25 !important; }
+.app-shell > header + section > p:last-child { margin-top: 5px !important; font-size: 12px; line-height: 1.55 !important; }
