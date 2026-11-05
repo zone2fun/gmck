@@ -22,7 +22,7 @@ export default function AuthPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/nearby`,
         },
       });
       if (authError) throw authError;
@@ -49,7 +49,7 @@ export default function AuthPage() {
         });
         if (authError) throw authError;
         if (data.session) {
-          window.location.href = "/welcome";
+          window.location.href = "/nearby";
           return;
         }
         setMessage("สมัครสมาชิกเรียบร้อยแล้ว กรุณาเปิดอีเมลเพื่อกดยืนยันบัญชีก่อนเข้าสู่ระบบ");
@@ -72,7 +72,7 @@ export default function AuthPage() {
   return (
     <main className="app-shell flex flex-col">
       <header className="flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/nearby" className="flex items-center gap-3">
           <span className="brand-mark">G</span>
           <span className="text-lg font-bold tracking-[.18em]">GMCK</span>
         </Link>
