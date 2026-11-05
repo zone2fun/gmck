@@ -26,7 +26,7 @@ export default async function NotificationsPage(){
  const names=new Map((profiles??[]).map((p:{id:string;nickname:string})=>[p.id,p.nickname]));
  return <main className="app-shell">
   <NotificationsRealtime userId={userId}/>
-  <header className="flex items-center justify-between"><Link href="/home" className="text-sm text-purple-200 underline">← หน้าแรก</Link><span className="text-lg font-bold tracking-[.18em]">GMCK</span></header>
+  <header className="flex items-center justify-between"><Link href="/nearby" className="text-sm text-purple-200 underline">← หน้าแรก</Link><span className="text-lg font-bold tracking-[.18em]">GMCK</span></header>
   <section className="mt-8"><p className="text-xs tracking-[.2em] text-purple-300">ACTIVITY</p><h1 className="glow mt-2 text-3xl font-semibold">การแจ้งเตือน</h1><p className="mt-2 text-sm text-zinc-400">แจ้งเตือนกิจกรรมในบัญชีของคุณ</p></section>
   <NotificationActions/>
   <PushNotificationSettings/>
