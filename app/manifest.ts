@@ -11,6 +11,6 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#09090f",
     lang: "th",
     orientation: "portrait-primary",
-    icons: [{ src: "/gmck-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }],
+    icons: [{ src: "/gmck-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" }],
   };
 }
