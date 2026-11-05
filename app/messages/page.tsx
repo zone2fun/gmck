@@ -14,7 +14,7 @@ export default async function MessagesPage() {
   const photos = await Promise.all(items.map(async item => item.other_avatar_path ? (await supabase.storage.from("profile-photos").createSignedUrl(item.other_avatar_path,1800)).data?.signedUrl ?? null : null));
   return <main className="app-shell">
     <InboxRealtime userId={userId}/>
-    <header className="flex items-center justify-between"><Link href="/home" className="text-sm text-purple-200 underline">← หน้าแรก</Link><span className="text-lg font-bold tracking-[.18em]">GMCK</span></header>
+    <header className="flex items-center justify-between"><Link href="/nearby" className="text-sm text-purple-200 underline">← หน้าแรก</Link><span className="text-lg font-bold tracking-[.18em]">GMCK</span></header>
     <section className="mt-8"><p className="text-xs tracking-[.2em] text-purple-300">MESSAGES</p><h1 className="glow mt-2 text-3xl font-semibold">ข้อความ</h1><p className="mt-2 text-sm text-zinc-400">คำขอข้อความและบทสนทนาของคุณ</p></section>
     <div className="mt-6 space-y-3">{items.map((item,i)=><Link key={item.conversation_id} href={"/messages/"+item.conversation_id} className="panel flex items-center gap-3 p-4 transition hover:border-purple-300/40">
       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-purple-500/15">{photos[i] ? <img src={photos[i]!} alt="" className="h-full w-full object-cover"/> : <div className="flex h-full items-center justify-center text-xl text-purple-200">{item.other_nickname?.slice(0,1) ?? "G"}</div>}</div>
