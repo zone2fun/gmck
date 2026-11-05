@@ -58,33 +58,27 @@ export default function ChatAlbumAccess({ownerId,otherId,incomingStatus,outgoing
  async function respond(approve:boolean){setBusy(true);setMessage("");const {data,error}=await supabase.rpc("respond_private_album_access",{p_viewer_id:otherId,p_approve:approve});if(error||data!==true){setMessage("ดำเนินการไม่สำเร็จ");setBusy(false);return;}setIncoming(approve?"approved":"revoked");setMessage(approve?"อนุมัติแล้ว":"ยกเลิกคำขอแล้ว");setBusy(false);router.refresh();}
  async function cancel(){setBusy(true);setMessage("");const {data,error}=await supabase.rpc("cancel_private_album_access_request",{p_owner_id:otherId});if(error||data!==true){setMessage("ยกเลิกคำขอไม่สำเร็จ");setBusy(false);return;}setOutgoing("revoked");setMessage("ยกเลิกคำขอแล้ว");setBusy(false);router.refresh();}
 
- return <section className="shrink-0 border-b border-white/10 bg-[#0d0c15] px-3 py-3 sm:px-4">
-  <div className="overflow-hidden rounded-2xl border border-purple-300/15 bg-gradient-to-br from-[#211a35] via-[#171523] to-[#11101a] shadow-[0_8px_28px_rgba(0,0,0,0.18)]">
-   <div className="flex items-center gap-3 border-b border-white/[0.07] px-3.5 py-3">
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-300/20 bg-purple-400/10 text-purple-200"><AccessIcon name="images" className="h-5 w-5"/></div>
-    <div className="min-w-0 flex-1"><h2 className="text-sm font-semibold text-purple-100">อัลบั้มส่วนตัว</h2><p className="mt-0.5 text-[11px] text-zinc-400">จัดการสิทธิ์การเข้าถึงอัลบั้มในแชทนี้</p></div>
-    <span className="rounded-full bg-white/[0.06] px-2 py-1 text-[10px] text-zinc-400">PRIVATE</span>
+ return <section className="shrink-0 border-b border-white/10 bg-[#0d0c15] px-3 py-1.5 sm:px-4">
+  <div className="overflow-hidden rounded-xl border border-purple-300/15 bg-[#171523]/90">
+   <div className="flex min-h-10 items-center gap-2 border-b border-white/[0.06] px-2.5 py-1.5">
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-400/10 text-purple-200"><AccessIcon name="images" className="h-4 w-4"/></div>
+    <h2 className="min-w-0 flex-1 text-xs font-semibold text-purple-100">อัลบั้มส่วนตัว</h2>
+    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] text-zinc-500">PRIVATE</span>
    </div>
-   {conversationAccepted ? <div className="space-y-2.5 p-3">
-    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/15 p-3">
-     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-400/10 text-sky-300"><AccessIcon name="inbox"/></div>
-     <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-100">คำขอที่ส่งถึงคุณ</p><p className="mt-0.5 text-[11px] text-zinc-500">อีกฝ่ายต้องการเข้าถึงอัลบั้มของคุณ</p></div>
-     <StatusBadge status={incoming}/>
+   {conversationAccepted ? <div className="divide-y divide-white/[0.05] px-2.5">
+    <div className="flex min-h-11 items-center gap-2 py-1.5">
+     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-400/10 text-sky-300"><AccessIcon name="inbox" className="h-3.5 w-3.5"/></div>
+     <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-zinc-200">คำขอที่ส่งถึงคุณ</p></div>
+     {incoming==="pending" ? <div className="flex shrink-0 items-center gap-1"><button disabled={busy} onClick={()=>void respond(false)} className="rounded-md border border-white/10 px-2 py-1 text-[10px] text-zinc-400 hover:bg-white/5 disabled:opacity-50">ปฏิเสธ</button><button disabled={busy} onClick={()=>void respond(true)} className="inline-flex items-center gap-1 rounded-md bg-purple-600 px-2 py-1 text-[10px] font-semibold text-white hover:bg-purple-500 disabled:opacity-50"><AccessIcon name="check" className="h-3 w-3"/>อนุมัติ</button></div> : <StatusBadge status={incoming}/>}
     </div>
-    {incoming==="pending"&&<div className="flex justify-end gap-2 px-1">
-     <button disabled={busy} onClick={()=>void respond(false)} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/5 disabled:opacity-50">ปฏิเสธ</button>
-     <button disabled={busy} onClick={()=>void respond(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-purple-500 disabled:opacity-50"><AccessIcon name="check" className="h-3.5 w-3.5"/>อนุมัติ</button>
-    </div>}
-    <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/15 p-3">
-     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-400/10 text-violet-300"><AccessIcon name="send"/></div>
-     <div className="min-w-0 flex-1"><p className="text-xs font-medium text-zinc-100">คำขอของคุณ</p><p className="mt-0.5 text-[11px] text-zinc-500">สถานะการขอเข้าถึงอัลบั้มของอีกฝ่าย</p></div>
+    <div className="flex min-h-11 items-center gap-2 py-1.5">
+     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-400/10 text-violet-300"><AccessIcon name="send" className="h-3.5 w-3.5"/></div>
+     <div className="min-w-0 flex-1"><p className="text-[11px] font-medium text-zinc-200">คำขอของคุณ</p></div>
+     {outgoing==="pending" ? <button disabled={busy} onClick={()=>void cancel()} className="shrink-0 rounded-md border border-white/10 px-2 py-1 text-[10px] text-zinc-400 hover:bg-white/5 disabled:opacity-50">ยกเลิกคำขอ</button> : outgoing==="none"||outgoing==="revoked" ? <button disabled={busy} onClick={()=>void request()} className="inline-flex shrink-0 items-center gap-1 rounded-md bg-purple-600 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-purple-500 disabled:opacity-50"><AccessIcon name="images" className="h-3 w-3"/>ขอดูอัลบั้ม</button> : <a href={"/album/"+otherId} className="inline-flex shrink-0 items-center gap-1 rounded-md border border-purple-300/20 bg-purple-400/10 px-2.5 py-1.5 text-[10px] font-medium text-purple-200 hover:bg-purple-400/15"><AccessIcon name="images" className="h-3 w-3"/>เปิดอัลบั้ม</a>}
      <StatusBadge status={outgoing} outgoing/>
     </div>
-    <div className="flex flex-wrap justify-end gap-2 px-1">
-     {outgoing==="pending"?<button disabled={busy} onClick={()=>void cancel()} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/5 disabled:opacity-50">ยกเลิกคำขอ</button>:outgoing==="none"||outgoing==="revoked"?<button disabled={busy} onClick={()=>void request()} className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-purple-500 disabled:opacity-50"><AccessIcon name="images" className="h-3.5 w-3.5"/>ขอดูอัลบั้ม</button>:<a href={"/album/"+otherId} className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300/20 bg-purple-400/10 px-3 py-2 text-xs font-medium text-purple-200 transition hover:bg-purple-400/15"><AccessIcon name="images" className="h-3.5 w-3.5"/>เปิดอัลบั้ม</a>}
-    </div>
-   </div>:<div className="flex items-start gap-2.5 p-3.5"><div className="mt-0.5 text-amber-300"><AccessIcon name="lock"/></div><p className="text-xs leading-5 text-zinc-400">ต้องยอมรับคำขอข้อความก่อน จึงจะใช้ระบบอัลบั้มส่วนตัวได้</p></div>}
-   {message&&<p role="status" className="mx-3 mb-3 rounded-lg border border-purple-300/10 bg-purple-400/10 px-3 py-2 text-xs text-purple-200">{message}</p>}
+   </div>:<div className="flex items-center gap-2 px-3 py-2"><div className="text-amber-300"><AccessIcon name="lock" className="h-3.5 w-3.5"/></div><p className="text-[11px] text-zinc-400">ต้องยอมรับคำขอข้อความก่อน จึงจะใช้ระบบอัลบั้มส่วนตัวได้</p></div>}
+   {message&&<p role="status" className="mx-2.5 mb-2 rounded-md border border-purple-300/10 bg-purple-400/10 px-2.5 py-1.5 text-[11px] text-purple-200">{message}</p>}
   </div>
  </section>;
 }
