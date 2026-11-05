@@ -17,5 +17,5 @@ export default async function MemberHomePage() {
   if (profileError || !profile?.profile_completed) redirect("/profile/setup");
 
   // The authenticated app now opens directly on the Discover tab.
-  redirect("/discover");
+  redirect("/nearby" );
 }
