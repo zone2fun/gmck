@@ -364,10 +364,16 @@ function translateDocument(language: Language, originals: WeakMap<Text, string>)
     for (const attr of ["placeholder", "aria-label", "title"] as const) {
       const value = element.getAttribute(attr);
       if (!value) continue;
-      const translated = language === "en" ? translations[value] : element.dataset["gmckOriginal" + attr];
-      if (language === "en" && !element.dataset["gmckOriginal" + attr]) element.dataset["gmckOriginal" + attr] = value;
-      if (translated && translated !== value) element.setAttribute(attr, translated);
-      if (language === "th" && translated) element.setAttribute(attr, translated);
+      // Use a valid data-* attribute name. dataset property names cannot contain hyphens.
+      const originalAttr = `data-gmck-original-${attr}`;
+      const originalValue = element.getAttribute(originalAttr);
+      if (language === "en") {
+        if (!originalValue) element.setAttribute(originalAttr, value);
+        const translated = translations[value];
+        if (translated && translated !== value) element.setAttribute(attr, translated);
+      } else if (originalValue && originalValue !== value) {
+        element.setAttribute(attr, originalValue);
+      }
     }
   });
 }
