@@ -8,6 +8,8 @@ type DemoProfile = {
   nickname: string;
   age: number;
   height_cm: number | null;
+  weight_kg: number | null;
+  occupation: string;
   body_type: string | null;
   interests: string[] | null;
   relationship_goal: string | null;
@@ -68,7 +70,8 @@ export default function DemoProfiles() {
             </div>
             <div className="p-3">
               <h3 className="text-sm font-bold text-white">{profile.nickname}, {profile.age}</h3>
-              <p className="mt-1 text-[10px] text-zinc-400">{[profile.height_cm ? profile.height_cm + " ซม." : "", profile.body_type ? bodyLabels[profile.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p>
+              <p className="mt-1 text-[10px] text-zinc-400">{[profile.height_cm ? profile.height_cm + " ซม." : "", profile.weight_kg ? profile.weight_kg + " กก." : "", profile.body_type ? bodyLabels[profile.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p>
+              <p className="mt-1 truncate text-[10px] text-purple-200">{profile.occupation}</p>
               <p className="mt-2 line-clamp-3 min-h-[3.75rem] text-xs leading-5 text-zinc-300">{profile.bio}</p>
               <p className="mt-2 text-[10px] font-medium text-purple-200">{profile.relationship_goal ? goalLabels[profile.relationship_goal] ?? profile.relationship_goal : "เปิดใจ"}</p>
               <div className="mt-2 flex flex-wrap gap-1">
