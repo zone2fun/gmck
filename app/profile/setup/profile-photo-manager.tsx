@@ -63,7 +63,9 @@ export default function ProfilePhotoManager({
         });
         if (uploadError) throw uploadError;
 
-        const position = Math.max(-1, ...photos.map(item => item.position), ...added.map(item => item.position)) + 1;
+        const usedPositions = new Set([...photos, ...added].map(item => item.position));
+        const position = [0, 1, 2, 3, 4, 5].find(value => !usedPositions.has(value));
+        if (position === undefined) throw new Error("เพิ่มรูปได้สูงสุด 6 รูป");
         const { data: row, error: insertError } = await supabase.from("profile_photos")
           .insert({ user_id: userId, path, position })
           .select("id,path,position")
@@ -75,7 +77,7 @@ export default function ProfilePhotoManager({
         const { data: signed } = await supabase.storage.from("profile-photos").createSignedUrl(path, 3600);
         if (signed?.signedUrl) added.push({ ...row, url: signed.signedUrl });
       }
-      const next = [...photos, ...added];
+      const next = [...photos, ...added].sort((a, b) => a.position - b.position);
       setPhotos(next);
       const primary = next[0]?.path ?? null;
       onPrimaryChange(primary);
