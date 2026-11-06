@@ -133,7 +133,7 @@ export default function ConversationView({conversationId,status,incoming,userId,
   }
   return <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
     <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-2 text-xs">
-      <span className="text-zinc-400">{otherTyping?"กำลังพิมพ์...":otherOnline?<span className="text-emerald-300">● ออนไลน์</span>:"ออฟไลน์"}</span>
+      <span className="text-zinc-400">{otherTyping?"กำลังพิมพ์...":otherOnline?"อยู่ในห้องแชต":""}</span>
       <span className={connected?"text-emerald-300":"text-zinc-500"}>{connected?"● เชื่อมต่อแบบเรียลไทม์":"กำลังเชื่อมต่อ..."}</span>
     </div>
     <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4">{messages.map(m=>{const path=imagePath(m.body);return <div key={m.id} className={"flex "+(m.sender_id===userId?"justify-end":"justify-start")}>{path?<div className="max-w-[82%] overflow-hidden rounded-2xl border border-white/10 bg-white/5">{imageUrls[m.id]?<button type="button" onClick={()=>setLightboxUrl(imageUrls[m.id])} className="block cursor-zoom-in" aria-label="ขยายดูรูปภาพ"><img src={imageUrls[m.id]} alt="รูปภาพที่ส่งในแชต" className="max-h-80 max-w-full object-contain"/></button>:<p className="px-4 py-3 text-xs text-zinc-400">กำลังโหลดรูปภาพ...</p>}</div>:<p className={"max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 "+(m.sender_id===userId?"bg-purple-600/80 text-white":"bg-white/10 text-zinc-200")}>{m.body}</p>}</div>})}<div ref={messagesEndRef} className="h-1 w-full" /></div>
