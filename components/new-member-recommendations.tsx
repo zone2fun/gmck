@@ -110,7 +110,7 @@ export default function NewMemberRecommendations() {
             ? <img src={member.avatar_url} alt={"รูปโปรไฟล์ของ " + member.nickname} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
             : <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_50%_35%,rgba(192,132,252,.25),transparent_50%)] text-2xl font-bold text-purple-100">{member.nickname.slice(0, 1).toUpperCase()}</div>}
           {member.founder_number && member.founder_role && <FoundingAvatarMark founderNumber={member.founder_number} founderRole={member.founder_role} />}
-          <MemberOnlineBadge memberId={member.member_id} dotOnly className="absolute bottom-2 right-2 z-10 bg-black/70 shadow-lg" />
+          <MemberOnlineBadge memberId={member.member_id} dotOnly className="absolute left-2 top-2 z-10 bg-black/70 shadow-lg" />
           <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
           <div className="absolute inset-x-2 bottom-2 min-w-0 text-white">
             <h2 className="truncate text-[11px] font-bold leading-tight">{member.founder_number && member.founder_role && <FoundingNameMark founderNumber={member.founder_number} founderRole={member.founder_role} />}{member.nickname}, {member.age}</h2>
