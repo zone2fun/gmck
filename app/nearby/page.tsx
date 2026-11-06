@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
@@ -123,7 +124,7 @@ export default function NearbyPage() {
 
  return <main className="app-shell" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} style={{overscrollBehaviorY:"contain"}}>
   {(pullDistance>0||busy||loading)&&<div className="pointer-events-none fixed left-0 right-0 top-2 z-50 flex justify-center"><span className="flex items-center gap-2 rounded-full border border-purple-300/20 bg-zinc-950/90 px-4 py-2 text-xs text-purple-200 shadow-lg">{busy||loading?<><LoadingSpinner small/> กำลังโหลดข้อมูลใกล้เคียง...</>:<>{pullDistance>=65?"ปล่อยเพื่อรีเฟรช":"ดึงลงเพื่อรีเฟรช"} <span aria-hidden>↓</span></>}</span></div>}
-  <header className="flex items-center justify-between"><Link href="/discover" className="flex items-center gap-3"><span className="brand-mark">G</span><span className="text-lg font-bold tracking-[.18em]">GMCK</span></Link><Link href="/settings" className="text-sm text-purple-200">ตั้งค่า <span aria-hidden>⚙</span></Link></header>
+  <header className="flex items-center justify-between"><Link href="/discover" aria-label="GMCK" className="flex items-center"><Image src="/gmck-header.png" alt="GMCK" width={1200} height={400} priority className="h-10 w-36 object-contain object-left" /></Link><Link href="/settings" className="text-sm text-purple-200">ตั้งค่า <span aria-hidden>⚙</span></Link></header>
   <Link href="/founding" className="group mt-6 flex items-center gap-3 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-purple-950/80 to-zinc-900/90 px-4 py-3 shadow-lg shadow-purple-950/20 transition hover:border-purple-300/50 hover:brightness-110">
    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-300/20 bg-purple-500/15 text-xl text-purple-200">♛</span>
    <span className="min-w-0 flex-1">
