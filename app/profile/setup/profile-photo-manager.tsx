@@ -63,7 +63,7 @@ export default function ProfilePhotoManager({
         });
         if (uploadError) throw uploadError;
 
-        const position = photos.length + added.length;
+        const position = Math.max(-1, ...photos.map(item => item.position), ...added.map(item => item.position)) + 1;
         const { data: row, error: insertError } = await supabase.from("profile_photos")
           .insert({ user_id: userId, path, position })
           .select("id,path,position")
