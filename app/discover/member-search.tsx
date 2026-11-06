@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
 
 type Member = {
   member_id: string; nickname: string; age: number; height_cm: number | null;
   body_type: string | null; interests: string[] | null; relationship_goal: string | null;
   bio: string | null; avatar_path?: string | null; avatar_url?: string | null;
+  founder_number?: number; founder_role?: "founding_council" | "community_ambassador" | "founding_member";
 };
 
 const bodyLabels: Record<string, string> = { slim:"ผอม", average:"สมส่วน", athletic:"นักกีฬา", muscular:"มีกล้าม", stocky:"หุ่นใหญ่", prefer_not_say:"ไม่ระบุ" };
@@ -29,13 +31,16 @@ export default function MemberSearch() {
     } else {
       const rows = (data ?? []) as Member[];
       const paths = [...new Set(rows.map(member => member.avatar_path).filter((path): path is string => Boolean(path)))];
-      const { data: photos } = paths.length
-        ? await supabase.storage.from("profile-photos").createSignedUrls(paths, 1800)
-        : { data: [] };
+      const [{ data: photos }, { data: badges }] = await Promise.all([
+        paths.length ? supabase.storage.from("profile-photos").createSignedUrls(paths, 1800) : Promise.resolve({ data: [] }),
+        rows.length ? supabase.rpc("get_visible_gmck_founder_badges", { p_member_ids: rows.map(member => member.member_id) }) : Promise.resolve({ data: [] }),
+      ]);
+      const badgeById = new Map((badges ?? []).map((badge: { member_id: string; founder_number: number; founder_role: "founding_council" | "community_ambassador" | "founding_member" }) => [badge.member_id, badge]));
       const photoByPath = new Map((photos ?? []).map(photo => [photo.path, photo.signedUrl]));
       setMembers(rows.map(member => ({
         ...member,
         avatar_url: member.avatar_path ? photoByPath.get(member.avatar_path) ?? null : null,
+        ...(badgeById.get(member.member_id) ?? {}),
       })));
     }
     setLoading(false);
@@ -50,11 +55,12 @@ export default function MemberSearch() {
     {searched && !loading && !error && members.length === 0 && <div className="panel mt-5 p-6 text-center"><p className="font-semibold">ยังไม่พบสมาชิก</p><p className="mt-2 text-sm leading-6 text-zinc-400">ลองค้นหาด้วยคำอื่น หรือกลับมาดูอีกครั้งภายหลัง</p></div>}
     <div className="member-grid mt-5">
       {members.map(member => <Link key={member.member_id} href={`/profile/${member.member_id}`} className="member-tile group">
-        <div className="member-tile-photo">
+        <div className="member-tile-photo relative">
           {member.avatar_url ? <img src={member.avatar_url} alt={`รูปโปรไฟล์ของ ${member.nickname}`} loading="lazy" /> : <div className="member-tile-placeholder"><span>{member.nickname.slice(0,1).toUpperCase()}</span></div>}
+          {member.founder_number && member.founder_role && <FoundingAvatarMark founderNumber={member.founder_number} founderRole={member.founder_role} />}
           <div className="member-tile-gradient" />
           {member.relationship_goal && <span className="member-tile-tag">{goalLabels[member.relationship_goal] ?? member.relationship_goal}</span>}
-          <div className="member-tile-caption"><h2>{member.nickname}, {member.age}</h2><p>{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p></div>
+          <div className="member-tile-caption"><h2>{member.nickname}{member.founder_number && member.founder_role && <FoundingNameMark founderNumber={member.founder_number} founderRole={member.founder_role} />}, {member.age}</h2><p>{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p></div>
         </div>
         {member.interests?.length ? <div className="member-tile-interests">{member.interests.slice(0,2).map(item => <span key={item}>{item}</span>)}</div> : <div className="member-tile-interests"><span>ดูโปรไฟล์</span></div>}
       </Link>)}
