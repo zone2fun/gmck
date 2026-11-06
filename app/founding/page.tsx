@@ -43,6 +43,7 @@ export default async function FoundingPage() {
         </p>
       </section>
       <FoundingEnrollment
+        userId={userId}
         initialFounder={founder}
         initialCapacity={capacity ?? []}
       />
