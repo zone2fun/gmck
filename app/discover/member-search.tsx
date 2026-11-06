@@ -60,7 +60,7 @@ export default function MemberSearch() {
           {member.founder_number && member.founder_role && <FoundingAvatarMark founderNumber={member.founder_number} founderRole={member.founder_role} />}
           <div className="member-tile-gradient" />
           {member.relationship_goal && <span className="member-tile-tag">{goalLabels[member.relationship_goal] ?? member.relationship_goal}</span>}
-          <div className="member-tile-caption"><h2>{member.nickname}{member.founder_number && member.founder_role && <FoundingNameMark founderNumber={member.founder_number} founderRole={member.founder_role} />}, {member.age}</h2><p>{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p></div>
+          <div className="member-tile-caption"><h2>{member.founder_number && member.founder_role && <FoundingNameMark founderNumber={member.founder_number} founderRole={member.founder_role} />}{member.nickname}, {member.age}</h2><p>{[member.height_cm ? `${member.height_cm} ซม.` : "", member.body_type ? bodyLabels[member.body_type] ?? "" : ""].filter(Boolean).join(" · ")}</p></div>
         </div>
         {member.interests?.length ? <div className="member-tile-interests">{member.interests.slice(0,2).map(item => <span key={item}>{item}</span>)}</div> : <div className="member-tile-interests"><span>ดูโปรไฟล์</span></div>}
       </Link>)}
