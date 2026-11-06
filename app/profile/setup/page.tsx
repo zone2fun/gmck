@@ -16,6 +16,8 @@ export default async function ProfileSetupPage() {
     .eq("id", userId)
     .maybeSingle();
 
+  const { data: photos } = await supabase.from("profile_photos").select("id,path,position").eq("user_id", userId).order("position", { ascending: true });
+
   return (
     <main className="app-shell">
       <header className="flex items-center justify-between">
@@ -27,7 +29,7 @@ export default async function ProfileSetupPage() {
         <h1 className="glow mt-3 text-3xl font-semibold">สร้างโปรไฟล์ของคุณ</h1>
         <p className="mt-3 text-sm leading-7 text-zinc-400">เริ่มต้นด้วยข้อมูลที่คุณสบายใจจะแบ่งปัน คุณสามารถกลับมาแก้ไขได้ภายหลัง</p>
       </div>
-      <ProfileForm userId={userId} initialProfile={profile} />
+      <ProfileForm userId={userId} initialProfile={profile} initialPhotos={photos ?? []} />
       <form action="/auth/signout" method="post" className="mt-5 text-center">
         <button type="submit" className="text-xs text-zinc-500 underline">ออกจากระบบ</button>
       </form>
