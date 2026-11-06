@@ -27,9 +27,11 @@ const roleLabel: Record<Role, string> = {
 };
 
 export default function FoundingEnrollment({
+  userId,
   initialFounder,
   initialCapacity,
 }: {
+  userId: string;
   initialFounder: Founder;
   initialCapacity: Capacity[];
 }) {
@@ -47,28 +49,15 @@ export default function FoundingEnrollment({
     setError("");
     setNotice("");
     try {
-      const { data, error: rpcError } = await supabase.rpc("claim_gmck_founder_slot", { p_role: selectedRole });
-      if (rpcError) throw rpcError;
-      const result = Array.isArray(data) ? data[0] : data;
-      if (!result) throw new Error("ไม่สามารถอ่านผลการสมัครได้ กรุณาลองอีกครั้ง");
-      if (result.status === "active" && typeof result.founder_number === "number") {
-        setFounder({
-          founder_number: result.founder_number,
-          founder_role: result.founder_role as Role,
-          status: "active",
-          created_at: new Date().toISOString(),
-          revoked_at: null,
-        });
-        setNotice(result.message ?? "สมัคร Founding 300 เรียบร้อยแล้ว");
-        router.refresh();
-      } else {
-        setNotice(result.message ?? "ยังไม่สามารถรับสิทธิ์ในบทบาทนี้ได้");
-        const { data: nextCapacity } = await supabase
-          .from("gmck_founder_capacity")
-          .select("founder_role,capacity,claimed,remaining")
-          .order("capacity", { ascending: true });
-        if (nextCapacity) setCapacity(nextCapacity as Capacity[]);
-      }
+      const { data, error: insertError } = await supabase
+        .from("gmck_founders")
+        .insert({ user_id: userId, founder_role: selectedRole })
+        .select("founder_number,founder_role,status,created_at,revoked_at")
+        .single();
+      if (insertError) throw insertError;
+      setFounder(data as Founder);
+      setNotice("สมัคร Founding 300 เรียบร้อยแล้ว");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง");
     } finally {
@@ -125,7 +114,7 @@ export default function FoundingEnrollment({
               disabled={busy || remainingFor(selectedRole) === 0}
               className="mt-5 w-full rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-purple-950/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {busy ? "กำลังยืนยันสิทธิ์..." : "สมัครเป็น Founding Member"}
+              {busy ? "กำลังยืนยันสิทธิ์..." : `สมัครเป็น ${roleLabel[selectedRole]}`}
             </button>
             <p className="mt-3 text-center text-xs leading-6 text-zinc-500">การสมัครจะยืนยันเมื่อระบบจัดสรรหมายเลขให้สำเร็จเท่านั้น หนึ่งบัญชีรับได้หนึ่งหมายเลข</p>
           </div>
