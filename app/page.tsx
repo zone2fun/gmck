@@ -33,6 +33,21 @@ export default async function HomePage() {
           จะหาเพื่อน คนคุย หรือความสัมพันธ์ดี ๆ ก็เริ่มต้นได้ที่นี่
         </p>
 
+        <Link
+          href="/founding"
+          className="group mt-7 flex items-center gap-3 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-purple-950/80 to-zinc-900/90 px-4 py-3 shadow-lg shadow-purple-950/20 transition hover:border-purple-300/50 hover:brightness-110"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-purple-300/20 bg-purple-500/15 text-2xl text-purple-200">
+            ♛
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10px] font-bold tracking-[.2em] text-purple-300">GMCK FOUNDER · FOUNDING 300</span>
+            <span className="mt-1 block text-sm font-semibold text-white">ร่วมเป็นหนึ่งใน 300 ผู้บุกเบิก GMCK</span>
+            <span className="mt-0.5 block text-xs text-zinc-400">ดูรายละเอียดและสิทธิ์สมาชิกผู้ก่อตั้ง</span>
+          </span>
+          <span aria-hidden="true" className="text-lg text-purple-300 transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+
         <div className="panel mt-10 space-y-5 p-5">
           {features.map((feature) => (
             <div className="flex gap-4" key={feature.title}>
