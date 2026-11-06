@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import MemberSearch from "./member-search";
-import DemoProfiles from "@/components/demo-profiles";
 
 export default async function DiscoverPage() {
   const supabase = await createClient();
@@ -21,7 +20,6 @@ export default async function DiscoverPage() {
         <p className="mt-2 text-sm leading-7 text-zinc-400">ค้นหาจากชื่อเล่น ความสนใจ หรือคำแนะนำตัว ระบบจะแสดงเฉพาะสมาชิกที่อนุญาตให้ค้นพบโปรไฟล์</p>
       </section>
       <MemberSearch />
-      <DemoProfiles />
       <p className="mt-7 text-center text-xs text-zinc-600">GMCK ไม่แสดงพิกัดจริงหรือระยะทางที่ระบุตำแหน่งได้</p>
     </main>
   );
