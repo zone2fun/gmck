@@ -52,11 +52,11 @@ export default function DemoProfiles() {
     <section className="mt-7" aria-label="โปรไฟล์ตัวอย่าง GMCK">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold tracking-[.2em] text-fuchsia-300">GMCK SAMPLE PROFILES</p>
-          <h2 className="glow mt-1 text-xl font-semibold">ลองดูโปรไฟล์ตัวอย่าง</h2>
-          <p className="mt-1 text-xs text-zinc-500">ข้อมูลจำลองเพื่อแสดงรูปแบบสมาชิกของ GMCK</p>
+          <p className="text-[10px] font-bold tracking-[.2em] text-fuchsia-300">GMCK FEATURED</p>
+          <h2 className="glow mt-1 text-xl font-semibold">โปรไฟล์แนะนำ</h2>
+          <p className="mt-1 text-xs text-zinc-500">คาแรกเตอร์ AI เพื่อแนะนำรูปแบบโปรไฟล์ GMCK</p>
         </div>
-        <span className="shrink-0 rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 px-2.5 py-1 text-[10px] text-fuchsia-200">{profiles.length} ตัวอย่าง</span>
+        <span className="shrink-0 rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 px-2.5 py-1 text-[10px] text-fuchsia-200">{profiles.length} FEATURED · AI</span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {profiles.map((profile, index) => (
@@ -64,7 +64,7 @@ export default function DemoProfiles() {
             <div className={`relative flex aspect-[5/3] items-center justify-center bg-gradient-to-br ${avatarStyles[index % avatarStyles.length]}`}>
               <span className="text-5xl font-black tracking-tight text-white/90 drop-shadow-[0_0_18px_rgba(216,180,254,.45)]">{profile.nickname.slice(0, 1)}</span>
               <span className="absolute left-2 top-2 rounded-full border border-white/15 bg-black/65 px-2 py-1 text-[9px] font-semibold text-fuchsia-100">ตัวอย่าง</span>
-              <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-1 text-[9px] text-zinc-200">ไม่ใช่สมาชิกจริง</span>
+              <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-1 text-[9px] text-zinc-200">AI CHARACTER</span>
             </div>
             <div className="p-3">
               <h3 className="text-sm font-bold text-white">{profile.nickname}, {profile.age}</h3>
@@ -78,7 +78,7 @@ export default function DemoProfiles() {
           </article>
         ))}
       </div>
-      <p className="mt-2 text-center text-[10px] leading-5 text-zinc-600">โปรไฟล์เหล่านี้เป็นข้อมูลสาธิตเท่านั้น ไม่มีตำแหน่ง GPS สถานะออนไลน์ หรือการส่งข้อความ</p>
+      <p className="mt-2 text-center text-[10px] leading-5 text-zinc-600">ตัวละครและข้อมูลสร้างด้วย AI ไม่ใช่สมาชิกจริง ไม่มี GPS สถานะออนไลน์ หรือระบบแชต</p>
     </section>
   );
 }
