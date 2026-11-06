@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Photo={id:string;path:string;created_at:string;url:string|null};
 type Request={viewer_id:string;nickname:string;requested_at:string;avatar_url:string|null};
-type Member={viewer_id:string;nickname:string;approved_at:string};
+type Member={viewer_id:string;nickname:string;approved_at:string;avatar_url:string|null};
 
 export default function PrivateAlbumManager({photos:initialPhotos,requests:initialRequests,members:initialMembers}:{photos:Photo[];requests:Request[];members:Member[]}) {
  const supabase=createClient(); const router=useRouter();
@@ -59,7 +59,7 @@ export default function PrivateAlbumManager({photos:initialPhotos,requests:initi
    {requests.length?requests.map(r=><div key={r.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><a href={"/profile/"+r.viewer_id} className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-purple-500/15" aria-label={"ดูโปรไฟล์ "+r.nickname}>{r.avatar_url?<img src={r.avatar_url} alt="" className="h-full w-full object-cover"/>:<span className="flex h-full items-center justify-center text-lg text-purple-200">{r.nickname.slice(0,1)}</span>}</a><div className="min-w-0 flex-1"><a href={"/profile/"+r.viewer_id} className="text-sm font-medium hover:text-purple-200">{r.nickname}</a><p className="text-xs text-zinc-500">ขอเข้าถึงอัลบั้ม</p></div><button disabled={busy} onClick={()=>void respond(r.viewer_id,false)} className="rounded-lg border border-white/10 px-3 py-2 text-xs">ปฏิเสธ</button><button disabled={busy} onClick={()=>void respond(r.viewer_id,true)} className="rounded-lg bg-purple-600 px-3 py-2 text-xs">อนุมัติ</button></div>):<p className="mt-3 text-sm text-zinc-500">ไม่มีคำขอใหม่</p>}
   </section>
   <section className="panel p-5"><h2 className="font-semibold">สมาชิกที่อนุมัติแล้ว</h2>
-   {members.length?members.map(m=><div key={m.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><p className="min-w-0 flex-1 truncate text-sm">{m.nickname}</p><button disabled={busy} onClick={()=>void revoke(m.viewer_id)} className="text-xs text-red-300 underline">เพิกถอนสิทธิ์</button></div>):<p className="mt-3 text-sm text-zinc-500">ยังไม่มีสมาชิกที่ได้รับอนุมัติ</p>}
+   {members.length?members.map(m=><div key={m.viewer_id} className="mt-3 flex items-center gap-3 border-t border-white/10 pt-3"><a href={"/profile/"+m.viewer_id} aria-label={"ดูโปรไฟล์ "+m.nickname} className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/10 bg-purple-500/15">{m.avatar_url?<img src={m.avatar_url} alt="" className="h-full w-full object-cover"/>:<span className="flex h-full items-center justify-center text-lg text-purple-200">{m.nickname.slice(0,1)}</span>}</a><a href={"/profile/"+m.viewer_id} className="min-w-0 flex-1 truncate text-sm hover:text-purple-200">{m.nickname}</a><button disabled={busy} onClick={()=>void revoke(m.viewer_id)} className="text-xs text-red-300 underline">เพิกถอนสิทธิ์</button></div>):<p className="mt-3 text-sm text-zinc-500">ยังไม่มีสมาชิกที่ได้รับอนุมัติ</p>}
   </section>
   {notice&&<p role="status" className="text-sm text-purple-200">{notice}</p>}{error&&<p role="alert" className="text-sm text-red-300">{error}</p>}
  </div>;
