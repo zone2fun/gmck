@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,7 +18,7 @@ export default async function HomePage() {
     <main className="app-shell flex flex-col">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="brand-mark">G</span>
+          <Image src="/gmck-logo.png" alt="GMCK" width={56} height={56} priority className="h-14 w-14 rounded-2xl object-cover shadow-lg shadow-purple-950/40" />
           <span className="text-lg font-bold tracking-[.18em]">GMCK</span>
         </div>
         <span className="pill rounded-full px-3 py-1 text-xs">18+ COMMUNITY</span>
