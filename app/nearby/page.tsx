@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
 import NewMemberRecommendations from "@/components/new-member-recommendations";
+import DemoProfiles from "@/components/demo-profiles";
 import { MemberOnlineBadge } from "@/components/presence-provider";
 
 type Member = { member_id:string; nickname:string; age:number; height_cm:number|null; avatar_path:string|null; avatar_url?:string|null; body_type:string|null; interests:string[]|null; relationship_goal:string|null; bio:string|null; distance_label:string; founder_number?:number; founder_role?:"founding_council"|"community_ambassador"|"founding_member" };
@@ -135,6 +136,7 @@ export default function NearbyPage() {
    <span aria-hidden="true" className="text-lg text-purple-300 transition-transform group-hover:translate-x-1">→</span>
   </Link>
   <NewMemberRecommendations />
+  <DemoProfiles />
   {notice&&<p role="status" className="mt-3 text-sm leading-6 text-purple-200">{notice}</p>}
   {enabled&&<section className="mt-7"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">สมาชิกใกล้คุณ</h2><span className="text-xs text-zinc-500">{members.length} คน</span></div>{(busy||loading)&&<div className="panel mt-4 flex items-center justify-center gap-3 p-5 text-sm text-zinc-300" role="status" aria-live="polite"><LoadingSpinner/> <span>กำลังค้นหาสมาชิกใกล้คุณ...</span></div>}{!busy&&!members.length&&<div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองกลับมาดูอีกครั้ง</div>}
   <div className="member-grid mt-4">{members.map(m=><Link key={m.member_id} href={"/profile/"+m.member_id} className="member-tile group"><div className="member-tile-photo relative">{m.avatar_url?<img src={m.avatar_url} alt={"รูปโปรไฟล์ของ "+m.nickname} loading="lazy"/>:<div className="member-tile-placeholder"><span>{m.nickname.slice(0,1).toUpperCase()}</span></div>}{m.founder_number&&m.founder_role&&<FoundingAvatarMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}<MemberOnlineBadge memberId={m.member_id} dotOnly className="absolute left-2 top-2 z-10 bg-black/70 shadow-lg"/> <div className="member-tile-gradient"/><span className="member-tile-tag">{m.distance_label}</span><div className="member-tile-caption"><h3>{m.founder_number&&m.founder_role&&<FoundingNameMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}{m.nickname}, {m.age}</h3><p>{[m.height_cm?m.height_cm+" ซม.":"",m.body_type?bodyLabels[m.body_type]??"":""] .filter(Boolean).join(" · ")}</p></div></div>{m.relationship_goal&&<div className="member-tile-interests"><span>{goalLabels[m.relationship_goal]??m.relationship_goal}</span></div>}</Link>)}</div></section>}
