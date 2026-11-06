@@ -14,9 +14,10 @@ const reasons = [
   ["other", "อื่น ๆ"],
 ] as const;
 
-export default function MemberSafetyActions({ memberId, returnTo = "/discover" }: { memberId: string; returnTo?: string }) {
+export default function MemberSafetyActions({ memberId, returnTo = "/discover", variant = "inline" }: { memberId: string; returnTo?: string; variant?: "inline" | "menu" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [reason, setReason] = useState<string>("harassment");
   const [details, setDetails] = useState("");
   const [busy, setBusy] = useState(false);
@@ -24,6 +25,7 @@ export default function MemberSafetyActions({ memberId, returnTo = "/discover" }
   const supabase = createClient();
 
   async function blockMember() {
+    setMenuOpen(false);
     if (!window.confirm("ต้องการบล็อกสมาชิกนี้ใช่หรือไม่? คุณจะไม่เห็นโปรไฟล์หรือแชตของกันและกัน และจะส่งข้อความหากันไม่ได้")) return;
     setBusy(true);
     setNotice("");
@@ -50,14 +52,10 @@ export default function MemberSafetyActions({ memberId, returnTo = "/discover" }
     setNotice("ส่งรายงานแล้ว ทีมงานจะตรวจสอบข้อมูล");
   }
 
-  return (
-    <div className="mt-4">
-      <div className="flex items-center justify-center gap-5 text-xs">
-        <button type="button" disabled={busy} onClick={() => setOpen(true)} className="text-zinc-400 underline underline-offset-4 hover:text-purple-200">รายงานสมาชิก</button>
-        <button type="button" disabled={busy} onClick={() => void blockMember()} className="text-red-300 underline underline-offset-4 hover:text-red-200">บล็อกสมาชิก</button>
-      </div>
-      {notice && <p role="status" className="mt-3 text-center text-xs text-purple-200">{notice}</p>}
-      {open && <div className="mt-4 rounded-2xl border border-white/10 bg-[#14131d] p-4">
+  const reportForm = open && (
+    <div className={variant === "menu" ? "fixed inset-0 z-[120] flex items-start justify-center bg-black/70 px-4 pt-[calc(env(safe-area-inset-top)+72px)]" : "mt-4"}>
+      {variant === "menu" && <button type="button" aria-label="ปิดหน้ารายงาน" onClick={() => setOpen(false)} className="absolute inset-0 cursor-default" />}
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-[#14131d] p-4 shadow-2xl">
         <form onSubmit={submitReport}>
           <div className="flex items-center justify-between gap-3">
             <h3 className="font-semibold">รายงานสมาชิก</h3>
@@ -75,7 +73,32 @@ export default function MemberSafetyActions({ memberId, returnTo = "/discover" }
             <button type="submit" disabled={busy} className="flex-1 rounded-xl bg-purple-600 px-3 py-3 text-sm font-semibold disabled:opacity-50">{busy ? "กำลังส่ง..." : "ส่งรายงาน"}</button>
           </div>
         </form>
-      </div>}
+      </div>
+    </div>
+  );
+
+  if (variant === "menu") {
+    return (
+      <div className="relative shrink-0">
+        <button type="button" aria-label="เมนูความปลอดภัย" aria-expanded={menuOpen} disabled={busy} onClick={() => setMenuOpen(value => !value)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-xl text-zinc-200 hover:border-purple-300/40 hover:text-white disabled:opacity-50">⋯</button>
+        {menuOpen && <div className="absolute right-0 top-12 z-[110] w-52 overflow-hidden rounded-xl border border-white/10 bg-[#171622] p-1 shadow-2xl">
+          <button type="button" onClick={() => { setMenuOpen(false); setOpen(true); }} className="w-full rounded-lg px-3 py-3 text-left text-sm text-zinc-200 hover:bg-white/5">รายงานสมาชิก</button>
+          <button type="button" onClick={() => void blockMember()} className="w-full rounded-lg px-3 py-3 text-left text-sm text-red-300 hover:bg-red-500/10">บล็อกสมาชิก</button>
+        </div>}
+        {notice && <p role="status" className="absolute right-0 top-12 z-[110] w-56 rounded-xl border border-white/10 bg-[#171622] p-3 text-xs text-purple-200 shadow-xl">{notice}</p>}
+        {reportForm}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-center gap-5 text-xs">
+        <button type="button" disabled={busy} onClick={() => setOpen(true)} className="text-zinc-400 underline underline-offset-4 hover:text-purple-200">รายงานสมาชิก</button>
+        <button type="button" disabled={busy} onClick={() => void blockMember()} className="text-red-300 underline underline-offset-4 hover:text-red-200">บล็อกสมาชิก</button>
+      </div>
+      {notice && <p role="status" className="mt-3 text-center text-xs text-purple-200">{notice}</p>}
+      {reportForm}
     </div>
   );
 }
