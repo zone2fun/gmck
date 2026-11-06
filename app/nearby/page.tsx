@@ -13,11 +13,6 @@ function LoadingSpinner({small=false}:{small?:boolean}) {
  return <span aria-hidden="true" className={`inline-block animate-spin rounded-full border-2 border-current border-r-transparent ${small?"h-3.5 w-3.5":"h-5 w-5"}`} />;
 }
 
-function accuracyLabel(meters:number) {
- if(meters<=100)return "ดี";
- if(meters<=1000)return "พอใช้";
- return "คลาดเคลื่อนสูง";
-}
 
 export default function NearbyPage() {
  const supabase=useMemo(()=>createClient(),[]);
@@ -27,7 +22,6 @@ export default function NearbyPage() {
  const [members,setMembers]=useState<Member[]>([]);
  const [notice,setNotice]=useState("");
  const [radius,setRadius]=useState(10);
- const [accuracy,setAccuracy]=useState<number|null>(null);
  const updateInProgress=useRef(false);
  const touchStartY=useRef<number|null>(null);
  const [pullDistance,setPullDistance]=useState(0);
@@ -58,7 +52,6 @@ export default function NearbyPage() {
   setBusy(true);setNotice("กำลังอ่าน GPS และอัปเดตตำแหน่ง...");
   navigator.geolocation.getCurrentPosition(async pos=>{
    const measuredAccuracy=Math.round(pos.coords.accuracy);
-   setAccuracy(measuredAccuracy);
    if(measuredAccuracy>1000){
     await searchMembers();
     setNotice("ตำแหน่งคลาดเคลื่อนสูง ("+measuredAccuracy+" เมตร) ระบบจึงไม่บันทึกพิกัดใหม่นี้ เพื่อป้องกันตำแหน่งผิดพลาด กรุณาเปิด Precise Location หรือทดลองกลางแจ้ง");
@@ -128,7 +121,7 @@ export default function NearbyPage() {
 
  return <main className="app-shell" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} style={{overscrollBehaviorY:"contain"}}>
   {(pullDistance>0||busy||loading)&&<div className="pointer-events-none fixed left-0 right-0 top-2 z-50 flex justify-center"><span className="flex items-center gap-2 rounded-full border border-purple-300/20 bg-zinc-950/90 px-4 py-2 text-xs text-purple-200 shadow-lg">{busy||loading?<><LoadingSpinner small/> กำลังโหลดข้อมูลใกล้เคียง...</>:<>{pullDistance>=65?"ปล่อยเพื่อรีเฟรช":"ดึงลงเพื่อรีเฟรช"} <span aria-hidden>↓</span></>}</span></div>}
-  <header className="flex items-center justify-between"><Link href="/discover" className="flex items-center gap-3"><span className="brand-mark">G</span><span className="text-lg font-bold tracking-[.18em]">GMCK</span></Link><Link href="/settings/nearby" className="text-sm text-purple-200">ตั้งค่า <span aria-hidden>⚙</span></Link></header>
+  <header className="flex items-center justify-between"><Link href="/discover" className="flex items-center gap-3"><span className="brand-mark">G</span><span className="text-lg font-bold tracking-[.18em]">GMCK</span></Link><Link href="/settings" className="text-sm text-purple-200">ตั้งค่า <span aria-hidden>⚙</span></Link></header>
   <Link href="/founding" className="group mt-6 flex items-center gap-3 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-purple-950/80 to-zinc-900/90 px-4 py-3 shadow-lg shadow-purple-950/20 transition hover:border-purple-300/50 hover:brightness-110">
    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-300/20 bg-purple-500/15 text-xl text-purple-200">♛</span>
    <span className="min-w-0 flex-1">
@@ -139,13 +132,10 @@ export default function NearbyPage() {
    <span aria-hidden="true" className="text-lg text-purple-300 transition-transform group-hover:translate-x-1">→</span>
   </Link>
   <section className="mt-9"><p className="text-xs font-semibold tracking-[.22em] text-purple-300">NEARBY</p><h1 className="glow mt-3 text-3xl font-semibold">สมาชิกใกล้เคียง</h1><p className="mt-2 text-sm leading-7 text-zinc-400">ค้นหาสมาชิกที่เปิด Nearby และยินยอมให้ค้นพบ โดยไม่เปิดเผยพิกัดจริง</p></section>
-  <section className="panel mt-6 p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">Nearby {enabled?"เปิดใช้งาน":"ปิดใช้งาน"}</p><p className="mt-1 text-xs text-zinc-400">ระยะค้นหา {radius} กม.</p></div><Link href="/settings/nearby" className="rounded-xl border border-purple-300/30 px-3 py-2 text-xs text-purple-200">จัดการการตั้งค่า</Link></div></section>
-  {enabled&&<button type="button" onClick={()=>void refreshLocation()} disabled={busy||loading} className="mt-4 w-full rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-semibold disabled:opacity-50">{busy?<span className="inline-flex items-center justify-center gap-2"><LoadingSpinner small/> กำลังค้นหา...</span>:"อัปเดตตำแหน่งและค้นหา"}</button>}
-  {accuracy!==null&&<p className="mt-3 text-xs text-zinc-400" role="status">GPS Accuracy: ประมาณ {accuracy.toLocaleString("th-TH")} เมตร · {accuracyLabel(accuracy)}</p>}
   {notice&&<p role="status" className="mt-3 text-sm leading-6 text-purple-200">{notice}</p>}
-  {enabled&&<section className="mt-7"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">สมาชิกใกล้คุณ</h2><span className="text-xs text-zinc-500">{members.length} คน</span></div>{(busy||loading)&&<div className="panel mt-4 flex items-center justify-center gap-3 p-5 text-sm text-zinc-300" role="status" aria-live="polite"><LoadingSpinner/> <span>กำลังค้นหาสมาชิกใกล้คุณ...</span></div>}{!busy&&!members.length&&<div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองเปลี่ยนรัศมีในการตั้งค่าหรือกลับมาดูอีกครั้ง</div>}
+  {enabled&&<section className="mt-7"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">สมาชิกใกล้คุณ</h2><span className="text-xs text-zinc-500">{members.length} คน</span></div>{(busy||loading)&&<div className="panel mt-4 flex items-center justify-center gap-3 p-5 text-sm text-zinc-300" role="status" aria-live="polite"><LoadingSpinner/> <span>กำลังค้นหาสมาชิกใกล้คุณ...</span></div>}{!busy&&!members.length&&<div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองกลับมาดูอีกครั้ง</div>}
   <div className="member-grid mt-4">{members.map(m=><Link key={m.member_id} href={"/profile/"+m.member_id} className="member-tile group"><div className="member-tile-photo relative">{m.avatar_url?<img src={m.avatar_url} alt={"รูปโปรไฟล์ของ "+m.nickname} loading="lazy"/>:<div className="member-tile-placeholder"><span>{m.nickname.slice(0,1).toUpperCase()}</span></div>}{m.founder_number&&m.founder_role&&<FoundingAvatarMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}<div className="member-tile-gradient"/><span className="member-tile-tag">{m.distance_label}</span><div className="member-tile-caption"><h3>{m.founder_number&&m.founder_role&&<FoundingNameMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}{m.nickname}, {m.age}</h3><p>{[m.height_cm?m.height_cm+" ซม.":"",m.body_type?bodyLabels[m.body_type]??"":""] .filter(Boolean).join(" · ")}</p></div></div>{m.relationship_goal&&<div className="member-tile-interests"><span>{goalLabels[m.relationship_goal]??m.relationship_goal}</span></div>}</Link>)}</div></section>}
-  {!enabled&&!loading&&<div className="panel mt-6 p-6 text-center"><p className="font-semibold">คุณยังไม่ได้เปิด Nearby</p><p className="mt-2 text-sm leading-6 text-zinc-400">ไปที่การตั้งค่าเพื่อเปิดใช้งานและกำหนดระยะค้นหา</p><Link href="/settings/nearby" className="mt-4 inline-block rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-5 py-3 text-sm font-semibold">ไปที่การตั้งค่า</Link></div>}
+  {!enabled&&!loading&&<div className="panel mt-6 p-6 text-center"><p className="font-semibold">คุณยังไม่ได้เปิด Nearby</p><p className="mt-2 text-sm leading-6 text-zinc-400">คุณสามารถเปิดใช้งาน Nearby ได้จากเมนูการตั้งค่า</p></div>}
   <p className="mt-7 text-center text-xs text-zinc-600">ตำแหน่งอัปเดตอัตโนมัติทุก 5 นาทีขณะเปิดหน้า Nearby · ปิด Nearby เพื่อลบตำแหน่ง</p>
  </main>;
 }
