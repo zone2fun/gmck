@@ -36,7 +36,9 @@ export default function MemberSearch() {
         rows.length ? supabase.rpc("get_visible_gmck_founder_badges", { p_member_ids: rows.map(member => member.member_id) }) : Promise.resolve({ data: [] }),
       ]);
       const badgeById = new Map<string, { member_id: string; founder_number: number; founder_role: "founding_council" | "community_ambassador" | "founding_member" }>((badges ?? []).map((badge: { member_id: string; founder_number: number; founder_role: "founding_council" | "community_ambassador" | "founding_member" }) => [badge.member_id, badge] as const));
-      const photoByPath = new Map<string, string | null>((photos ?? []).map(photo => [photo.path, photo.signedUrl] as const));
+      const photoByPath = new Map<string, string | null>(
+        (photos ?? []).flatMap(photo => photo.path ? [[photo.path, photo.signedUrl] as const] : [])
+      );
       setMembers(rows.map(member => ({
         ...member,
         avatar_url: member.avatar_path ? photoByPath.get(member.avatar_path) ?? null : null,
