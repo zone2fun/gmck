@@ -48,6 +48,12 @@ export default function NearbyPage() {
   navigator.geolocation.getCurrentPosition(async pos=>{
    const measuredAccuracy=Math.round(pos.coords.accuracy);
    setAccuracy(measuredAccuracy);
+   if(measuredAccuracy>1000){
+    await searchMembers();
+    setNotice("ตำแหน่งคลาดเคลื่อนสูง ("+measuredAccuracy+" เมตร) ระบบจึงไม่บันทึกพิกัดใหม่นี้ เพื่อป้องกันตำแหน่งผิดพลาด กรุณาเปิด Precise Location หรือทดลองกลางแจ้ง");
+    updateInProgress.current=false;
+    return;
+   }
    try {
     const {error}=await supabase.rpc("update_my_nearby_location",{p_lat:pos.coords.latitude,p_lon:pos.coords.longitude});
     if(error){
