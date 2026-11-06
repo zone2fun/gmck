@@ -129,6 +129,15 @@ export default function NearbyPage() {
  return <main className="app-shell" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} style={{overscrollBehaviorY:"contain"}}>
   {(pullDistance>0||busy||loading)&&<div className="pointer-events-none fixed left-0 right-0 top-2 z-50 flex justify-center"><span className="flex items-center gap-2 rounded-full border border-purple-300/20 bg-zinc-950/90 px-4 py-2 text-xs text-purple-200 shadow-lg">{busy||loading?<><LoadingSpinner small/> กำลังโหลดข้อมูลใกล้เคียง...</>:<>{pullDistance>=65?"ปล่อยเพื่อรีเฟรช":"ดึงลงเพื่อรีเฟรช"} <span aria-hidden>↓</span></>}</span></div>}
   <header className="flex items-center justify-between"><Link href="/discover" className="flex items-center gap-3"><span className="brand-mark">G</span><span className="text-lg font-bold tracking-[.18em]">GMCK</span></Link><Link href="/settings/nearby" className="text-sm text-purple-200">ตั้งค่า <span aria-hidden>⚙</span></Link></header>
+  <Link href="/founding" className="group mt-6 flex items-center gap-3 rounded-2xl border border-purple-400/25 bg-gradient-to-r from-purple-950/80 to-zinc-900/90 px-4 py-3 shadow-lg shadow-purple-950/20 transition hover:border-purple-300/50 hover:brightness-110">
+   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-300/20 bg-purple-500/15 text-xl text-purple-200">♛</span>
+   <span className="min-w-0 flex-1">
+    <span className="block text-[10px] font-bold tracking-[.2em] text-purple-300">GMCK FOUNDER · FOUNDING 300</span>
+    <span className="mt-1 block text-sm font-semibold text-white">ร่วมเป็นหนึ่งใน 300 ผู้บุกเบิก GMCK</span>
+    <span className="mt-0.5 block text-xs text-zinc-400">ดูรายละเอียดและสิทธิ์สมาชิกผู้ก่อตั้ง</span>
+   </span>
+   <span aria-hidden="true" className="text-lg text-purple-300 transition-transform group-hover:translate-x-1">→</span>
+  </Link>
   <section className="mt-9"><p className="text-xs font-semibold tracking-[.22em] text-purple-300">NEARBY</p><h1 className="glow mt-3 text-3xl font-semibold">สมาชิกใกล้เคียง</h1><p className="mt-2 text-sm leading-7 text-zinc-400">ค้นหาสมาชิกที่เปิด Nearby และยินยอมให้ค้นพบ โดยไม่เปิดเผยพิกัดจริง</p></section>
   <section className="panel mt-6 p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">Nearby {enabled?"เปิดใช้งาน":"ปิดใช้งาน"}</p><p className="mt-1 text-xs text-zinc-400">ระยะค้นหา {radius} กม.</p></div><Link href="/settings/nearby" className="rounded-xl border border-purple-300/30 px-3 py-2 text-xs text-purple-200">จัดการการตั้งค่า</Link></div></section>
   {enabled&&<button type="button" onClick={()=>void refreshLocation()} disabled={busy||loading} className="mt-4 w-full rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-semibold disabled:opacity-50">{busy?<span className="inline-flex items-center justify-center gap-2"><LoadingSpinner small/> กำลังค้นหา...</span>:"อัปเดตตำแหน่งและค้นหา"}</button>}
