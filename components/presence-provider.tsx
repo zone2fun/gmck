@@ -62,16 +62,17 @@ export function PresenceProvider({ children }: { children: React.ReactNode }) {
   return <OnlineMembersContext.Provider value={onlineIds}>{children}</OnlineMembersContext.Provider>;
 }
 
-export function MemberOnlineBadge({ memberId, className = "" }: { memberId: string; className?: string }) {
+export function MemberOnlineBadge({ memberId, className = "", dotOnly = false }: { memberId: string; className?: string; dotOnly?: boolean }) {
   const onlineIds = useContext(OnlineMembersContext);
   const online = onlineIds.includes(memberId);
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${online ? "text-emerald-300" : "text-zinc-500"} ${className}`}
+      className={`inline-flex items-center ${dotOnly ? "h-3.5 w-3.5 justify-center rounded-full border-2 border-zinc-950" : "gap-1.5 text-[11px] font-medium"} ${online ? "text-emerald-300" : "text-zinc-500"} ${className}`}
       aria-label={online ? "ออนไลน์" : "ออฟไลน์"}
+      title={online ? "ออนไลน์" : "ออฟไลน์"}
     >
-      <span className={`h-2 w-2 rounded-full ${online ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.65)]" : "bg-zinc-600"}`} />
-      {online ? "ออนไลน์" : "ออฟไลน์"}
+      <span className={`${dotOnly ? "h-2.5 w-2.5" : "h-2 w-2"} rounded-full ${online ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.75)]" : "bg-zinc-600"}`} />
+      {!dotOnly && (online ? "ออนไลน์" : "ออฟไลน์")}
     </span>
   );
 }
