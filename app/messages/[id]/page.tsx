@@ -31,9 +31,11 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
         <h1 className="truncate text-base font-semibold">{otherName}</h1>
         <p className="text-[11px] text-zinc-500">{c.status==="accepted"?"บทสนทนา":c.status==="pending"?(c.recipient_id===userId?"คำขอข้อความใหม่":"รอการตอบรับ"):"คำขอถูกปฏิเสธ"}</p>
       </div>
-      <Link href={"/profile/"+otherId} className="text-sm text-purple-200">โปรไฟล์</Link>
+      <div className="flex shrink-0 items-center gap-2">
+        <Link href={"/profile/"+otherId} className="text-sm text-purple-200">โปรไฟล์</Link>
+        <MemberSafetyActions memberId={otherId} returnTo="/messages" variant="menu"/>
+      </div>
     </header>
-    <div className="shrink-0 border-b border-white/10 px-4 py-1"><MemberSafetyActions memberId={otherId} returnTo="/messages"/></div>
     <ChatAlbumAccess ownerId={userId} otherId={otherId} incomingStatus={albumRequest?.status??"none"} outgoingStatus={albumAccess?.status??"none"} conversationAccepted={c.status==="accepted"}/>
     <ConversationView conversationId={id} status={c.status} incoming={c.recipient_id===userId&&c.status==="pending"} userId={userId} initialMessages={(messages??[]) as Message[]}/>
   </main>;
