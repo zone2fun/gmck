@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
 
-type Member = { member_id:string; nickname:string; age:number; height_cm:number|null; avatar_path:string|null; avatar_url?:string|null; body_type:string|null; interests:string[]|null; relationship_goal:string|null; bio:string|null; distance_label:string };
+type Member = { member_id:string; nickname:string; age:number; height_cm:number|null; avatar_path:string|null; avatar_url?:string|null; body_type:string|null; interests:string[]|null; relationship_goal:string|null; bio:string|null; distance_label:string; founder_number?:number; founder_role?:"founding_council"|"community_ambassador"|"founding_member" };
 const bodyLabels:Record<string,string>={slim:"ผอม",average:"สมส่วน",athletic:"นักกีฬา",muscular:"มีกล้าม",stocky:"หุ่นใหญ่",prefer_not_say:"ไม่ระบุ"};
 const goalLabels:Record<string,string>={friends:"หาเพื่อน",chat:"พูดคุย",casual:"ความสัมพันธ์แบบสบาย ๆ",dating:"เดต",long_term:"ความสัมพันธ์จริงจัง",open_to_all:"เปิดใจ"};
 
@@ -38,9 +39,13 @@ export default function NearbyPage() {
   else {
    const rows=(data??[]) as Member[];
    const paths=[...new Set(rows.map(m=>m.avatar_path).filter((p):p is string=>Boolean(p)))];
-   const {data:photos}=paths.length?await supabase.storage.from("profile-photos").createSignedUrls(paths,1800):{data:[]};
-   const photoByPath=new Map((photos??[]).map(photo=>[photo.path,photo.signedUrl]));
-   setMembers(rows.map(m=>({...m,avatar_url:m.avatar_path?photoByPath.get(m.avatar_path)??null:null})));
+   const [{data:photos},{data:badges}]=await Promise.all([
+    paths.length?supabase.storage.from("profile-photos").createSignedUrls(paths,1800):Promise.resolve({data:[]}),
+    rows.length?supabase.rpc("get_visible_gmck_founder_badges",{p_member_ids:rows.map(m=>m.member_id)}):Promise.resolve({data:[]}),
+   ]);
+   const photoByPath=new Map((photos??[]).map((photo:{path:string;signedUrl:string|null})=>[photo.path,photo.signedUrl]));
+   const badgeById=new Map((badges??[]).map((badge:{member_id:string;founder_number:number;founder_role:"founding_council"|"community_ambassador"|"founding_member"})=>[badge.member_id,badge]));
+   setMembers(rows.map(m=>({...m,avatar_url:m.avatar_path?photoByPath.get(m.avatar_path)??null:null,...(badgeById.get(m.member_id)??{})})));
    if(!rows.length)setNotice("ยังไม่พบสมาชิกในระยะนี้ที่เปิด Nearby และเปิดให้ค้นพบโปรไฟล์");
   }
   setBusy(false);
@@ -130,7 +135,7 @@ export default function NearbyPage() {
   {accuracy!==null&&<p className="mt-3 text-xs text-zinc-400" role="status">GPS Accuracy: ประมาณ {accuracy.toLocaleString("th-TH")} เมตร · {accuracyLabel(accuracy)}</p>}
   {notice&&<p role="status" className="mt-3 text-sm leading-6 text-purple-200">{notice}</p>}
   {enabled&&<section className="mt-7"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">สมาชิกใกล้คุณ</h2><span className="text-xs text-zinc-500">{members.length} คน</span></div>{(busy||loading)&&<div className="panel mt-4 flex items-center justify-center gap-3 p-5 text-sm text-zinc-300" role="status" aria-live="polite"><LoadingSpinner/> <span>กำลังค้นหาสมาชิกใกล้คุณ...</span></div>}{!busy&&!members.length&&<div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองเปลี่ยนรัศมีในการตั้งค่าหรือกลับมาดูอีกครั้ง</div>}
-  <div className="member-grid mt-4">{members.map(m=><Link key={m.member_id} href={"/profile/"+m.member_id} className="member-tile group"><div className="member-tile-photo">{m.avatar_url?<img src={m.avatar_url} alt={"รูปโปรไฟล์ของ "+m.nickname} loading="lazy"/>:<div className="member-tile-placeholder"><span>{m.nickname.slice(0,1).toUpperCase()}</span></div>}<div className="member-tile-gradient"/><span className="member-tile-tag">{m.distance_label}</span><div className="member-tile-caption"><h3>{m.nickname}, {m.age}</h3><p>{[m.height_cm?m.height_cm+" ซม.":"",m.body_type?bodyLabels[m.body_type]??"":""] .filter(Boolean).join(" · ")}</p></div></div>{m.relationship_goal&&<div className="member-tile-interests"><span>{goalLabels[m.relationship_goal]??m.relationship_goal}</span></div>}</Link>)}</div></section>}
+  <div className="member-grid mt-4">{members.map(m=><Link key={m.member_id} href={"/profile/"+m.member_id} className="member-tile group"><div className="member-tile-photo relative">{m.avatar_url?<img src={m.avatar_url} alt={"รูปโปรไฟล์ของ "+m.nickname} loading="lazy"/>:<div className="member-tile-placeholder"><span>{m.nickname.slice(0,1).toUpperCase()}</span></div>}{m.founder_number&&m.founder_role&&<FoundingAvatarMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}<div className="member-tile-gradient"/><span className="member-tile-tag">{m.distance_label}</span><div className="member-tile-caption"><h3>{m.nickname}{m.founder_number&&m.founder_role&&<FoundingNameMark founderNumber={m.founder_number} founderRole={m.founder_role}/ >}, {m.age}</h3><p>{[m.height_cm?m.height_cm+" ซม.":"",m.body_type?bodyLabels[m.body_type]??"":""] .filter(Boolean).join(" · ")}</p></div></div>{m.relationship_goal&&<div className="member-tile-interests"><span>{goalLabels[m.relationship_goal]??m.relationship_goal}</span></div>}</Link>)}</div></section>}
   {!enabled&&!loading&&<div className="panel mt-6 p-6 text-center"><p className="font-semibold">คุณยังไม่ได้เปิด Nearby</p><p className="mt-2 text-sm leading-6 text-zinc-400">ไปที่การตั้งค่าเพื่อเปิดใช้งานและกำหนดระยะค้นหา</p><Link href="/settings/nearby" className="mt-4 inline-block rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-5 py-3 text-sm font-semibold">ไปที่การตั้งค่า</Link></div>}
   <p className="mt-7 text-center text-xs text-zinc-600">ตำแหน่งอัปเดตอัตโนมัติทุก 5 นาทีขณะเปิดหน้า Nearby · ปิด Nearby เพื่อลบตำแหน่ง</p>
  </main>;
