@@ -187,6 +187,10 @@ const translations: Record<string, string> = {
   "สมาชิกใกล้ฉัน": "Nearby members", "สมาชิกใกล้คุณ": "Members near you",
   "ตำแหน่งคลาดเคลื่อนสูง (": "Location accuracy is low (",
   "เมตร) ระบบจึงไม่บันทึกพิกัดใหม่นี้ เพื่อป้องกันตำแหน่งผิดพลาด กรุณาเปิด Precise Location หรือทดลองกลางแจ้ง": " meters). This location was not saved to avoid inaccurate results. Enable Precise Location or try outdoors.",
+
+  "เลือกภาษาไทยหรือ English สำหรับทั้งแอป": "Choose Thai or English for the entire app",
+  "เหลือ": "Remaining", "คน": "members", "ยินดีต้อนรับ": "Welcome",
+  "สถานะ": "Status", "รูปภาพ": "Photos", "บันทึก": "Save",
 };
 
 type LanguageContextValue = { language: Language; setLanguage: (language: Language) => void };
