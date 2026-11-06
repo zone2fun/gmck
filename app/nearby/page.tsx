@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
+import NewMemberRecommendations from "@/components/new-member-recommendations";
 
 type Member = { member_id:string; nickname:string; age:number; height_cm:number|null; avatar_path:string|null; avatar_url?:string|null; body_type:string|null; interests:string[]|null; relationship_goal:string|null; bio:string|null; distance_label:string; founder_number?:number; founder_role?:"founding_council"|"community_ambassador"|"founding_member" };
 const bodyLabels:Record<string,string>={slim:"ผอม",average:"สมส่วน",athletic:"นักกีฬา",muscular:"มีกล้าม",stocky:"หุ่นใหญ่",prefer_not_say:"ไม่ระบุ"};
@@ -62,7 +63,7 @@ export default function NearbyPage() {
     const {error}=await supabase.rpc("update_my_nearby_location",{p_lat:pos.coords.latitude,p_lon:pos.coords.longitude});
     if(error){
      const cooldown=error.message.toLowerCase().includes("wait");
-     if(cooldown){await searchMembers();setNotice("ตำแหน่งเพิ่งอัปเดตไป ระบบใช้ตำแหน่งล่าสุดที่บันทึกไว้ (รออย่างน้อย 2 นาทีระหว่างการบันทึก)");}
+     if(cooldown){await searchMembers();setNotice("");}
      else setNotice("บันทึกตำแหน่งไม่สำเร็จ กรุณาลองอีกครั้ง");
      setBusy(false);updateInProgress.current=false;return;
     }
@@ -131,7 +132,7 @@ export default function NearbyPage() {
    </span>
    <span aria-hidden="true" className="text-lg text-purple-300 transition-transform group-hover:translate-x-1">→</span>
   </Link>
-  <section className="mt-9"><p className="text-xs font-semibold tracking-[.22em] text-purple-300">NEARBY</p><h1 className="glow mt-3 text-3xl font-semibold">สมาชิกใกล้เคียง</h1><p className="mt-2 text-sm leading-7 text-zinc-400">ค้นหาสมาชิกที่เปิด Nearby และยินยอมให้ค้นพบ โดยไม่เปิดเผยพิกัดจริง</p></section>
+  <NewMemberRecommendations />
   {notice&&<p role="status" className="mt-3 text-sm leading-6 text-purple-200">{notice}</p>}
   {enabled&&<section className="mt-7"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">สมาชิกใกล้คุณ</h2><span className="text-xs text-zinc-500">{members.length} คน</span></div>{(busy||loading)&&<div className="panel mt-4 flex items-center justify-center gap-3 p-5 text-sm text-zinc-300" role="status" aria-live="polite"><LoadingSpinner/> <span>กำลังค้นหาสมาชิกใกล้คุณ...</span></div>}{!busy&&!members.length&&<div className="panel mt-4 p-5 text-center text-sm leading-6 text-zinc-400">ยังไม่มีสมาชิกแสดงในระยะนี้ ลองกลับมาดูอีกครั้ง</div>}
   <div className="member-grid mt-4">{members.map(m=><Link key={m.member_id} href={"/profile/"+m.member_id} className="member-tile group"><div className="member-tile-photo relative">{m.avatar_url?<img src={m.avatar_url} alt={"รูปโปรไฟล์ของ "+m.nickname} loading="lazy"/>:<div className="member-tile-placeholder"><span>{m.nickname.slice(0,1).toUpperCase()}</span></div>}{m.founder_number&&m.founder_role&&<FoundingAvatarMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}<div className="member-tile-gradient"/><span className="member-tile-tag">{m.distance_label}</span><div className="member-tile-caption"><h3>{m.founder_number&&m.founder_role&&<FoundingNameMark founderNumber={m.founder_number} founderRole={m.founder_role}/>}{m.nickname}, {m.age}</h3><p>{[m.height_cm?m.height_cm+" ซม.":"",m.body_type?bodyLabels[m.body_type]??"":""] .filter(Boolean).join(" · ")}</p></div></div>{m.relationship_goal&&<div className="member-tile-interests"><span>{goalLabels[m.relationship_goal]??m.relationship_goal}</span></div>}</Link>)}</div></section>}
