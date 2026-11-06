@@ -17,9 +17,7 @@ export default async function HomePage() {
   return (
     <main className="app-shell flex flex-col">
       <header className="flex items-center justify-between">
-        <div className="relative h-12 w-36 overflow-hidden" aria-label="GMCK">
-          <Image src="/gmck-logo.png" alt="GMCK" width={512} height={512} priority className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 76%", transform: "scale(1.35)" }} />
-        </div>
+        <Image src="/gmck-header.png" alt="GMCK" width={1200} height={400} priority className="h-12 w-40 object-contain object-left" />
         <span className="pill rounded-full px-3 py-1 text-xs">18+ COMMUNITY</span>
       </header>
 
