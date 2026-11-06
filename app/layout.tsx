@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   applicationName: "GMCK",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "GMCK" },
-  icons: { icon: "/gmck-icon.svg", shortcut: "/gmck-icon.svg" },
+  icons: { icon: "/gmck-logo.png", shortcut: "/gmck-logo.png", apple: "/gmck-logo.png" },
 };
 
 export const viewport: Viewport = {
