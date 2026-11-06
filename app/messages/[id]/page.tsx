@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import ConversationView from "./conversation-view";
 import MemberSafetyActions from "@/components/member-safety-actions";
 import ChatAlbumAccess from "./chat-album-access";
+import { MemberOnlineBadge } from "@/components/presence-provider";
 
 type Conversation = { id: string; requester_id: string; recipient_id: string; status: "pending"|"accepted"|"declined" };
 type Message = { id: string; sender_id: string; body: string; created_at: string };
@@ -28,7 +29,7 @@ export default async function ConversationPage({params}:{params:Promise<{id:stri
     <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3 pt-[calc(env(safe-area-inset-top)+12px)]">
       <Link href="/messages" className="text-sm text-purple-200">← ข้อความ</Link>
       <div className="min-w-0 flex-1 px-3 text-center">
-        <h1 className="truncate text-base font-semibold">{otherName}</h1>
+        <h1 className="truncate text-base font-semibold">{otherName}</h1><MemberOnlineBadge memberId={otherId} className="mt-0.5 justify-center"/>
         <p className="text-[11px] text-zinc-500">{c.status==="accepted"?"บทสนทนา":c.status==="pending"?(c.recipient_id===userId?"คำขอข้อความใหม่":"รอการตอบรับ"):"คำขอถูกปฏิเสธ"}</p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
