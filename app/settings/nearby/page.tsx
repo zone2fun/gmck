@@ -27,6 +27,11 @@ export default function NearbySettingsPage() {
     navigator.geolocation.getCurrentPosition(async (position) => {
       const measuredAccuracy=Math.round(position.coords.accuracy);
       setAccuracy(measuredAccuracy);
+      if (measuredAccuracy > 1000) {
+        setNotice("ตำแหน่งคลาดเคลื่อนสูง (" + measuredAccuracy + " เมตร) ระบบจึงไม่บันทึกพิกัดใหม่นี้ เพื่อป้องกันตำแหน่งผิดพลาด กรุณาเปิด Precise Location หรือทดลองกลางแจ้ง");
+        setBusy(false);
+        return;
+      }
       try {
         const { error } = await supabase.rpc("update_my_nearby_location", { p_lat: position.coords.latitude, p_lon: position.coords.longitude });
         if (error) setNotice(error.message.toLowerCase().includes("wait") ? "เพิ่งอัปเดตตำแหน่งไป กรุณารออย่างน้อย 2 นาที" : "บันทึกตำแหน่งไม่สำเร็จ กรุณาลองอีกครั้ง");
