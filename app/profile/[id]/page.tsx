@@ -6,6 +6,7 @@ import MemberSafetyActions from "@/components/member-safety-actions";
 import PrivateAlbumAccessButton from "./private-album-access-button";
 import { FoundingAvatarMark, FoundingNameMark } from "@/components/founding-mark";
 import { MemberOnlineBadge } from "@/components/presence-provider";
+import ProfilePhotoCarousel from "./profile-photo-carousel";
 
 type Profile = {
   member_id: string;
@@ -17,6 +18,7 @@ type Profile = {
   relationship_goal: string | null;
   bio: string | null;
   avatar_path: string | null;
+  profile_photo_paths: string[] | null;
 };
 
 const goals: Record<string, string> = {
@@ -46,13 +48,18 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   if (error || !data?.length) notFound();
 
   const profile = data[0] as Profile;
-  const [{ data: conversations }, { data: photo }, { data: founderBadges }] = await Promise.all([
+  const [{ data: conversations }, { data: founderBadges }] = await Promise.all([
     supabase.rpc("get_my_conversations"),
-    profile.avatar_path
-      ? supabase.storage.from("profile-photos").createSignedUrl(profile.avatar_path, 1800)
-      : Promise.resolve({ data: null }),
     supabase.rpc("get_visible_gmck_founder_badges", { p_member_ids: [profile.member_id] }),
   ]);
+
+  const photoPaths = profile.profile_photo_paths?.length
+    ? profile.profile_photo_paths
+    : profile.avatar_path ? [profile.avatar_path] : [];
+  const photoResults = await Promise.all(photoPaths.map(path =>
+    supabase.storage.from("profile-photos").createSignedUrl(path, 1800)
+  ));
+  const photoUrls = photoResults.map(result => result.data?.signedUrl).filter((url): url is string => !!url);
 
   const existingConversation = ((conversations ?? []) as {
     conversation_id: string;
@@ -61,7 +68,6 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     is_incoming_request: boolean;
   }[]).find((item) => item.other_user_id === profile.member_id);
 
-  const avatarUrl = photo?.signedUrl ?? null;
   const founder = founderBadges?.[0] as {
     founder_number: number;
     founder_role: "founding_council" | "community_ambassador" | "founding_member";
@@ -76,13 +82,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         </div>
 
         <div className="relative h-[min(68vh,680px)] min-h-[390px] overflow-hidden bg-[#171020] sm:rounded-b-[2rem]">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={"รูปโปรไฟล์ของ " + profile.nickname} className="h-full w-full object-cover object-center" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(ellipse_at_50%_35%,rgba(168,85,247,.45),transparent_55%),linear-gradient(145deg,#32104b,#100d18_70%)]">
-              <span className="text-8xl font-black text-white/80">{profile.nickname.slice(0, 1)}</span>
-            </div>
-          )}
+          <ProfilePhotoCarousel photos={photoUrls} name={profile.nickname} />
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#0b0911] via-[#0b0911]/65 to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 z-10 sm:bottom-7 sm:left-7">
             <div className="mb-2 flex items-center gap-2">
