@@ -40,7 +40,7 @@ export default function PrivateAlbumManager({photos:initialPhotos,requests:initi
   const {error:e}=await supabase.rpc("respond_private_album_access",{p_viewer_id:id,p_approve:approve});
   if(e){setError("ดำเนินการไม่สำเร็จ");setBusy(false);return;}
   setRequests(current=>current.filter(r=>r.viewer_id!==id));
-  if(approve){const req=requests.find(r=>r.viewer_id===id);if(req)setMembers(current=>[{viewer_id:id,nickname:req.nickname,approved_at:new Date().toISOString()},...current]);}
+  if(approve){const req=requests.find(r=>r.viewer_id===id);if(req)setMembers(current=>[{viewer_id:id,nickname:req.nickname,approved_at:new Date().toISOString(),avatar_url:req.avatar_url},...current]);}
   setBusy(false);setNotice(approve?"อนุมัติให้ดูอัลบั้มแล้ว":"ปฏิเสธคำขอแล้ว");router.refresh();
  }
  async function revoke(id:string){
