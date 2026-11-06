@@ -43,7 +43,7 @@ export default function NearbyPage() {
     paths.length?supabase.storage.from("profile-photos").createSignedUrls(paths,1800):Promise.resolve({data:[]}),
     rows.length?supabase.rpc("get_visible_gmck_founder_badges",{p_member_ids:rows.map(m=>m.member_id)}):Promise.resolve({data:[]}),
    ]);
-   const photoByPath=new Map<string, string | null>((photos??[]).map((photo:{path:string;signedUrl:string|null})=>[photo.path,photo.signedUrl] as const));
+   const photoByPath=new Map<string, string | null>((photos ?? []).flatMap((photo) => photo.path ? [[photo.path, photo.signedUrl] as const] : []));
    const badgeById=new Map<string, {member_id:string;founder_number:number;founder_role:"founding_council"|"community_ambassador"|"founding_member"}>((badges??[]).map((badge:{member_id:string;founder_number:number;founder_role:"founding_council"|"community_ambassador"|"founding_member"})=>[badge.member_id,badge] as const));
    setMembers(rows.map(m=>({...m,avatar_url:m.avatar_path?photoByPath.get(m.avatar_path)??null:null,...(badgeById.get(m.member_id)??{})})));
    if(!rows.length)setNotice("ยังไม่พบสมาชิกในระยะนี้ที่เปิด Nearby และเปิดให้ค้นพบโปรไฟล์");
