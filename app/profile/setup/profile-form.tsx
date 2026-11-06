@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
+import ProfilePhotoManager from "./profile-photo-manager";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,7 +27,7 @@ type ExistingProfile = {
   is_discoverable: boolean;
 };
 
-export default function ProfileForm({ userId, initialProfile }: { userId: string; initialProfile: ExistingProfile | null }) {
+export default function ProfileForm({ userId, initialProfile, initialPhotos }: { userId: string; initialProfile: ExistingProfile | null; initialPhotos: { id: string; path: string; position: number }[] }) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [nickname, setNickname] = useState(initialProfile?.nickname ?? "");
@@ -36,24 +37,13 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
   const [interests, setInterests] = useState<string[]>(initialProfile?.interests ?? []);
   const [goal, setGoal] = useState(initialProfile?.relationship_goal ?? "");
   const [about, setAbout] = useState(initialProfile?.bio ?? "");
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState("");
   const [avatarPath, setAvatarPath] = useState(initialProfile?.avatar_path ?? "");
   const [isDiscoverable, setIsDiscoverable] = useState(initialProfile?.is_discoverable ?? false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let active = true;
-    async function loadPhoto() {
-      if (!avatarPath) { setPhotoPreview(""); return; }
-      const { data } = await supabase.storage.from("profile-photos").createSignedUrl(avatarPath, 3600);
-      if (active && data?.signedUrl) setPhotoPreview(data.signedUrl);
-    }
-    void loadPhoto();
-    return () => { active = false; };
-  }, [avatarPath, supabase]);
+  const handlePrimaryChange = useCallback((path: string | null) => setAvatarPath(path ?? ""), []);
 
   function toggleInterest(value: string) {
     setInterests((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
@@ -77,16 +67,7 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
 
     setSaving(true);
     try {
-      let nextAvatarPath = avatarPath || null;
-      if (photo) {
-        const extension = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
-        const path = `${userId}/${crypto.randomUUID()}.${extension}`;
-        const { error: uploadError } = await supabase.storage.from("profile-photos").upload(path, photo, {
-          contentType: photo.type, upsert: false,
-        });
-        if (uploadError) throw uploadError;
-        nextAvatarPath = path;
-      }
+      const nextAvatarPath = avatarPath || null;
 
       const { error: saveError } = await supabase.from("profiles").upsert({
         id: userId,
@@ -104,7 +85,6 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
       });
       if (saveError) throw saveError;
       setAvatarPath(nextAvatarPath ?? "");
-      setPhoto(null);
       setMessage("บันทึกโปรไฟล์เรียบร้อยแล้ว กำลังไปหน้าแรก...");
       router.push("/home");
       router.refresh();
@@ -117,24 +97,7 @@ export default function ProfileForm({ userId, initialProfile }: { userId: string
 
   return (
     <form onSubmit={handleSubmit} className="mt-7 space-y-6">
-      <section className="panel p-5">
-        <h2 className="text-base font-semibold">รูปโปรไฟล์</h2>
-        <p className="mt-1 text-xs text-zinc-400">ใช้รูปที่เห็นใบหน้าหรือบุคลิกของคุณได้ชัดเจน ขนาดไม่เกิน 5 MB</p>
-        <div className="mt-4 flex items-center gap-4">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 text-2xl text-purple-200">
-            {photoPreview ? <img src={photoPreview} alt="รูปโปรไฟล์" className="h-full w-full object-cover" /> : "G"}
-          </div>
-          <label className="cursor-pointer rounded-xl border border-purple-300/30 px-4 py-2.5 text-sm text-purple-200">
-            เลือกรูปภาพ
-            <input className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => {
-              const file = e.target.files?.[0] ?? null;
-              if (file && file.size > 5 * 1024 * 1024) { setError("รูปภาพต้องมีขนาดไม่เกิน 5 MB"); return; }
-              setPhoto(file);
-              if (file) setPhotoPreview(URL.createObjectURL(file));
-            }} />
-          </label>
-        </div>
-      </section>
+      <ProfilePhotoManager userId={userId} initialPhotos={initialPhotos} onPrimaryChange={handlePrimaryChange} />
 
       <section className="panel space-y-4 p-5">
         <div><h2 className="text-base font-semibold">ข้อมูลพื้นฐาน</h2><p className="mt-1 text-xs text-zinc-400">ชื่อเล่นจะแสดงแทนชื่อจริง</p></div>
