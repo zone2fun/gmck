@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 
 export type Language = "th" | "en";
 const STORAGE_KEY = "gmck_language";
+const originalTextNodes = new WeakMap<Text, string>();
 const translations: Record<string, string> = {
   "← กลับ": "← Back", "← หน้าแรก": "← Home", "← การตั้งค่า": "← Settings",
   "การตั้งค่า": "Settings", "ตั้งค่า": "Settings", "จัดการการใช้งานและความเป็นส่วนตัวของคุณ": "Manage your app preferences and privacy",
@@ -126,8 +127,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const originals = new WeakMap<Text, string>();
-    const apply = () => translateDocument(language, originals);
+    const apply = () => translateDocument(language, originalTextNodes);
     apply();
     const observer = new MutationObserver(apply);
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
