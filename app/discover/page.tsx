@@ -11,7 +11,7 @@ export default async function DiscoverPage() {
   return (
     <main className="app-shell">
       <header className="flex items-center justify-between">
-        <Link href="/home" className="flex items-center gap-3"><span className="brand-mark">G</span><span className="text-lg font-bold tracking-[.18em]">GMCK</span></Link>
+        <Link href="/home" aria-label="GMCK" className="flex items-center"><img src="/gmck-header.png" alt="GMCK" className="h-10 w-auto object-contain" /></Link>
         <Link href="/profile/setup" className="text-xs text-purple-200 underline">แก้ไขโปรไฟล์</Link>
       </header>
       <section className="mt-9">
