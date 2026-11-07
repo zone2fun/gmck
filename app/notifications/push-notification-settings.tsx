@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+
+type PushState = {
+  supported: boolean;
+  permission: NotificationPermission | "unsupported";
+  subscribed: boolean;
+  registered: boolean;
+};
+
+const initialState: PushState = {
+  supported: false,
+  permission: "unsupported",
+  subscribed: false,
+  registered: false,
+};
 
 function decodeKey(value: string): Uint8Array {
   const padding = "=".repeat((4 - (value.length % 4)) % 4);
@@ -11,21 +25,81 @@ function decodeKey(value: string): Uint8Array {
 }
 
 export default function PushNotificationSettings() {
-  const [supported, setSupported] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const [state, setState] = useState<PushState>(initialState);
+  const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    const available = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-    setSupported(available);
-    if (available) {
-      navigator.serviceWorker.register("/sw.js").then(async (registration) => {
-        const subscription = await registration.pushManager.getSubscription();
-        setEnabled(Boolean(subscription));
-      }).catch(() => setMessage("ไม่สามารถเตรียมระบบแจ้งเตือนบนอุปกรณ์นี้ได้"));
+  const refreshState = useCallback(async () => {
+    const supported =
+      "serviceWorker" in navigator &&
+      "PushManager" in window &&
+      "Notification" in window;
+
+    if (!supported) {
+      setState({ ...initialState, supported: false });
+      setChecking(false);
+      return;
+    }
+
+    const permission = Notification.permission;
+    try {
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      const subscription = await registration?.pushManager.getSubscription();
+      let registered = false;
+
+      if (subscription) {
+        const supabase = createClient();
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (user) {
+          const { data, error } = await supabase
+            .from("push_subscriptions")
+            .select("endpoint")
+            .eq("user_id", user.id)
+            .eq("endpoint", subscription.endpoint)
+            .maybeSingle();
+          if (error) throw error;
+          registered = Boolean(data);
+        }
+      }
+
+      setState({
+        supported: true,
+        permission,
+        subscribed: Boolean(subscription),
+        registered,
+      });
+    } catch {
+      setState((current) => ({
+        ...current,
+        supported: true,
+        permission,
+        registered: false,
+      }));
+      setMessage("ตรวจสอบสถานะการแจ้งเตือนในบัญชี GMCK ไม่สำเร็จ");
+    } finally {
+      setChecking(false);
     }
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      if (!active) return;
+      await refreshState();
+    };
+    void check();
+
+    const onFocus = () => { void check(); };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refreshState]);
+
+  const enabled = state.permission === "granted" && state.subscribed && state.registered;
 
   async function enable() {
     setBusy(true);
@@ -33,8 +107,19 @@ export default function PushNotificationSettings() {
     try {
       const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!publicKey) throw new Error("ยังไม่ได้ตั้งค่า VAPID Public Key ในระบบ");
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") throw new Error("คุณยังไม่ได้อนุญาตให้ส่งการแจ้งเตือน");
+
+      const permission = Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        await refreshState();
+        throw new Error(
+          permission === "denied"
+            ? "เบราว์เซอร์ปฏิเสธการแจ้งเตือนแล้ว กรุณาเปลี่ยนสิทธิ์เว็บไซต์ GMCK ในการตั้งค่าเบราว์เซอร์"
+            : "คุณยังไม่ได้อนุญาตให้ส่งการแจ้งเตือน"
+        );
+      }
 
       const registration = await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
@@ -58,16 +143,13 @@ export default function PushNotificationSettings() {
         user_agent: navigator.userAgent,
       }, { onConflict: "endpoint" });
       if (error) throw error;
-      setEnabled(true);
-      setMessage("เปิดรับการแจ้งเตือนบนอุปกรณ์นี้แล้ว");
+
+      await refreshState();
+      setMessage("เปิดรับการแจ้งเตือนบนอุปกรณ์นี้แล้ว และบันทึกอุปกรณ์ใน GMCK เรียบร้อย");
     } catch (error) {
-      const detail =
-        error && typeof error === "object" && "message" in error
-          ? String((error as { message: unknown }).message)
-          : error instanceof Error
-            ? error.message
-            : JSON.stringify(error);
-      setMessage(detail || "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาลองอีกครั้ง");
+      const detail = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาลองอีกครั้ง";
+      setMessage(detail);
+      await refreshState();
     } finally {
       setBusy(false);
     }
@@ -79,20 +161,49 @@ export default function PushNotificationSettings() {
     try {
       const registration = await navigator.serviceWorker.getRegistration("/");
       const subscription = await registration?.pushManager.getSubscription();
+
       if (subscription) {
         const supabase = createClient();
-        const { error } = await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
-        if (error) throw error;
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (user) {
+          const { error } = await supabase
+            .from("push_subscriptions")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("endpoint", subscription.endpoint);
+          if (error) throw error;
+        }
         await subscription.unsubscribe();
       }
-      setEnabled(false);
-      setMessage("ปิดการแจ้งเตือนบนอุปกรณ์นี้แล้ว");
+
+      await refreshState();
+      setMessage("ปิดการรับแจ้งเตือนบนอุปกรณ์นี้แล้ว (สิทธิ์เบราว์เซอร์ยังคงอนุญาตอยู่)");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "ไม่สามารถปิดการแจ้งเตือนได้");
+      await refreshState();
     } finally {
       setBusy(false);
     }
   }
+
+  const statusLabel = !state.supported
+    ? "ไม่รองรับ"
+    : state.permission === "denied"
+      ? "ถูกบล็อก"
+      : enabled
+        ? "เปิดใช้งาน"
+        : state.permission === "granted" && state.subscribed && !state.registered
+          ? "ยังไม่เชื่อมกับบัญชี"
+          : state.permission === "granted"
+            ? "อนุญาตแล้ว · ยังไม่เปิดใช้"
+            : "ยังไม่อนุญาต";
+
+  const statusClass = enabled
+    ? "bg-emerald-400/10 text-emerald-300"
+    : state.permission === "denied"
+      ? "bg-rose-400/10 text-rose-300"
+      : "bg-zinc-400/10 text-zinc-300";
 
   return (
     <section className="panel mt-5 p-4">
@@ -103,22 +214,44 @@ export default function PushNotificationSettings() {
             รับแจ้งเตือนคำขอข้อความและอัลบั้มส่วนตัว แม้ไม่ได้เปิด GMCK อยู่
           </p>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs ${enabled ? "bg-emerald-400/10 text-emerald-300" : "bg-zinc-400/10 text-zinc-300"}`}>
-          {enabled ? "เปิดอยู่" : "ปิดอยู่"}
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs ${statusClass}`}>
+          {checking ? "กำลังตรวจสอบ…" : statusLabel}
         </span>
       </div>
-      {!supported ? (
+
+      {!state.supported ? (
         <p className="mt-3 text-xs text-amber-300">เบราว์เซอร์นี้ยังไม่รองรับ Push Notification</p>
       ) : (
-        <button
-          type="button"
-          onClick={enabled ? disable : enable}
-          disabled={busy}
-          className="mt-4 w-full rounded-xl bg-purple-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          {busy ? "กำลังดำเนินการ…" : enabled ? "ปิดการแจ้งเตือนบนอุปกรณ์นี้" : "เปิดรับการแจ้งเตือนบนอุปกรณ์นี้"}
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={enabled ? disable : enable}
+            disabled={busy || checking || state.permission === "denied"}
+            className="mt-4 w-full rounded-xl bg-purple-500 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {busy
+              ? "กำลังดำเนินการ…"
+              : checking
+                ? "กำลังตรวจสอบสถานะ…"
+                : enabled
+                  ? "ปิดการรับแจ้งเตือนบนอุปกรณ์นี้"
+                  : state.permission === "denied"
+                    ? "โปรดอนุญาต GMCK ในการตั้งค่าเบราว์เซอร์"
+                    : "เปิดรับการแจ้งเตือนบนอุปกรณ์นี้"}
+          </button>
+          {state.permission === "denied" && (
+            <p className="mt-3 text-xs leading-5 text-amber-300">
+              เบราว์เซอร์บล็อกการแจ้งเตือนอยู่ ต้องเข้าไปอนุญาตเว็บไซต์ GMCK ในการตั้งค่าเว็บไซต์ก่อน
+            </p>
+          )}
+          {state.permission === "granted" && !enabled && !checking && (
+            <p className="mt-3 text-xs leading-5 text-zinc-400">
+              เบราว์เซอร์อนุญาตแล้ว แต่ระบบยังไม่พบการสมัครรับแจ้งเตือนที่เชื่อมกับบัญชี GMCK ครบถ้วน
+            </p>
+          )}
+        </>
       )}
+
       {message && <p role="status" className="mt-3 text-xs text-purple-200">{message}</p>}
       <p className="mt-3 text-[11px] leading-5 text-zinc-500">
         iPhone/iPad: เพิ่ม GMCK ไปยังหน้าจอโฮมและเปิดเว็บจากไอคอนก่อน จากนั้นจึงกดอนุญาตการแจ้งเตือน
