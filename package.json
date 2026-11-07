@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
-    "cap:ios": "cap open ios"
+    "cap:ios": "cap open ios",
+    "cap:add": "cap add android && cap add ios"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
