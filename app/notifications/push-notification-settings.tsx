@@ -31,6 +31,7 @@ export default function PushNotificationSettings() {
   const [message, setMessage] = useState("");
 
   const refreshState = useCallback(async () => {
+    setChecking(true);
     const supported =
       "serviceWorker" in navigator &&
       "PushManager" in window &&
