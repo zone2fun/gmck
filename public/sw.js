@@ -29,7 +29,7 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 
-const GMCK_STATIC_CACHE = "gmck-static-v1";
+const GMCK_STATIC_CACHE = "gmck-static-v2";
 const GMCK_STATIC_PREFIX = self.location.origin + "/_next/static/";
 
 self.addEventListener("install", (event) => {
