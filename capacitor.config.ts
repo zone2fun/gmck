@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "com.gmck.app",
   appName: "GMCK",
-  webDir: "out",
+  webDir: "mobile-shell",
   server: {
     // GMCK currently uses Next.js server rendering and Supabase SSR.
     // Keep the production web app hosted on Vercel until a native-compatible
@@ -27,7 +27,7 @@ const config: CapacitorConfig = {
       showSpinner: false,
     },
     StatusBar: {
-      style: "DARK",
+      style: "LIGHT",
       backgroundColor: "#09090f",
     },
     PushNotifications: {
