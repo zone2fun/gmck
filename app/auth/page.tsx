@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,11 +14,40 @@ export default function AuthPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    if (!authError) return;
+    const messages: Record<string, string> = {
+      oauth_cancelled: "ยกเลิกการเข้าสู่ระบบด้วย Google แล้ว คุณสามารถลองใหม่ได้",
+      oauth_failed: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    };
+    setError(messages[authError] ?? "ยืนยันบัญชีไม่สำเร็จ กรุณาลองใหม่หรือติดต่อผู้ดูแลระบบ");
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
   async function handleGoogleSignIn() {
     setGoogleBusy(true);
     setError("");
     setMessage("");
     try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.getPlatform() === "android") {
+        const { Browser } = await import("@capacitor/browser");
+        const { data, error: authError } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: "com.gmck.app://auth/callback",
+            skipBrowserRedirect: true,
+          },
+        });
+        if (authError) throw authError;
+        if (!data.url) throw new Error("ไม่สามารถเริ่มการเข้าสู่ระบบด้วย Google ได้");
+        await Browser.open({ url: data.url });
+        return;
+      }
+
+      // Keep the existing browser OAuth flow for web and PWA users.
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
