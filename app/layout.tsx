@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import MobileTabBar from "@/components/mobile-tab-bar";
 import PwaRegister from "@/components/pwa-register";
+import CapacitorAuthBridge from "@/components/capacitor-auth-bridge";
 import { PresenceProvider } from "@/components/presence-provider";
 import { LanguageProvider } from "@/components/language-provider";
 
@@ -19,5 +20,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="th"><body><LanguageProvider><PresenceProvider>{children}<MobileTabBar /><PwaRegister /></PresenceProvider></LanguageProvider></body></html>;
+  return <html lang="th"><body><LanguageProvider><PresenceProvider>{children}<MobileTabBar /><PwaRegister /><CapacitorAuthBridge /></PresenceProvider></LanguageProvider></body></html>;
 }
