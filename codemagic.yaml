@@ -31,3 +31,44 @@ workflows:
     artifacts:
       - build/ios/Build/Products/Debug-iphonesimulator/*.app
       - /tmp/xcodebuild_logs/*.log
+
+  gmck-ios-device-unsigned:
+    name: GMCK iPhone Device Build (Unsigned)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      node: v22.23.4
+      xcode: latest
+
+    scripts:
+      - name: Install Node dependencies
+        script: npm ci
+
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+
+      - name: Build for real iPhone
+        script: |
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -configuration Debug \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios-device" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package unsigned IPA
+        script: |
+          mkdir -p "$CM_BUILD_DIR/unsigned-ipa/Payload"
+          cp -R "$CM_BUILD_DIR/build/ios-device/Build/Products/Debug-iphoneos/App.app" \
+            "$CM_BUILD_DIR/unsigned-ipa/Payload/"
+          cd "$CM_BUILD_DIR/unsigned-ipa"
+          zip -qr "$CM_BUILD_DIR/GMCK-unsigned.ipa" Payload
+
+    artifacts:
+      - $CM_BUILD_DIR/GMCK-unsigned.ipa
+      - /tmp/xcodebuild_logs/*.log
