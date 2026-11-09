@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 function isAuthCallback(value: string): URL | null {
   try {
     const url = new URL(value);
-    return url.protocol === "com.gmck.app:" && url.hostname === "auth" && url.pathname === "/callback" ? url : null;
+    return ["com.gmck.app:", "gmck:"].includes(url.protocol) && url.hostname === "auth" && url.pathname === "/callback" ? url : null;
   } catch {
     return null;
   }

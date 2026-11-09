@@ -32,12 +32,19 @@ export default function AuthPage() {
     setMessage("");
     try {
       const { Capacitor } = await import("@capacitor/core");
-      if (Capacitor.getPlatform() === "android") {
+      const platform = Capacitor.getPlatform();
+
+      if (platform === "android" || platform === "ios") {
         const { Browser } = await import("@capacitor/browser");
+        const redirectTo =
+          platform === "ios"
+            ? "gmck://auth/callback"
+            : "com.gmck.app://auth/callback";
+
         const { data, error: authError } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
-            redirectTo: "com.gmck.app://auth/callback",
+            redirectTo,
             skipBrowserRedirect: true,
           },
         });
